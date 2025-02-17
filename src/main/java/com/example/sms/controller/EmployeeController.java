@@ -1,19 +1,11 @@
-package com.example.SMS.controller;
+package com.example.sms.controller;
 
-import com.example.SMS.dto.EmployeeDto;
-import com.example.SMS.entity.Employee;
-import com.example.SMS.repository.EmployeeRepository;
-import com.example.SMS.service.EmployeeService;
-import org.apache.coyote.BadRequestException;
-import org.hibernate.annotations.NotFound;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.HttpStatus;
+import com.example.sms.dto.EmployeeDto;
+import com.example.sms.entity.Employee;
+import com.example.sms.service.EmployeeService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api")
@@ -38,10 +30,8 @@ public class EmployeeController {
 
     @GetMapping("/{firstName}")
     public EmployeeDto getEmployeeByUsername(@PathVariable(name = "firstName") String firstName) {
-        return new EmployeeDto(
-                employeeService.findByFirstName(firstName).orElseThrow(),
-                true
-        );
+        return new EmployeeDto(employeeService.findByFirstName(firstName).stream().findFirst().orElseThrow(),
+                true);
     }
 
     @GetMapping("/employees/{id}")
@@ -52,17 +42,17 @@ public class EmployeeController {
         );
     }
 
+    @GetMapping("/search")
+    public List<EmployeeDto> searchEmployees(@RequestParam(name = "firstName", required = false) String firstName,
+                                             @RequestParam(name = "lastName", required = false) String lastName) {
+        List<Employee> employees = employeeService.searchEmployees(firstName, lastName);
+        return employees.stream()
+                .map(employee -> new EmployeeDto(employee, false))
+                .toList();
+    }
+
     @PostMapping
     public EmployeeDto createEmployee(@RequestBody Employee employee) {
         return new EmployeeDto(employeeService.addEmployee(employee), false);
-    }
-
-    @PutMapping("/{id}")
-    public EmployeeDto updateEmployee(@PathVariable Long id, @RequestBody Employee employeeData) {
-        try {
-            return new EmployeeDto(employeeService.updateEmployee(id, employeeData), true);
-        } catch (ChangeSetPersister.NotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found", e);
-        }
     }
 }

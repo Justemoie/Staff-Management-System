@@ -1,7 +1,6 @@
-package com.example.SMS.repository;
+package com.example.sms.repository;
 
-import com.example.SMS.entity.Assignment;
-import com.example.SMS.entity.Employee;
+import com.example.sms.entity.Assignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {

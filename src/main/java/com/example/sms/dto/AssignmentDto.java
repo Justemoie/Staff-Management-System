@@ -1,6 +1,6 @@
-package com.example.SMS.dto;
+package com.example.sms.dto;
 
-import com.example.SMS.entity.Assignment;
+import com.example.sms.entity.Assignment;
 
 import java.util.ArrayList;
 import java.util.List;

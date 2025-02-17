@@ -1,4 +1,4 @@
-package com.example.SMS.entity;
+package com.example.sms.entity;
 
 import jakarta.persistence.*;
 

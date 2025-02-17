@@ -1,4 +1,4 @@
-package com.example.SMS.entity;
+package com.example.sms.entity;
 
 import jakarta.persistence.*;
 
@@ -45,7 +45,6 @@ public class Employee {
     }
 
     public Long getId() {
-        System.out.println(id);
         return id;
     }
 
