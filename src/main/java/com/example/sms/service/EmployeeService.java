@@ -2,10 +2,9 @@ package com.example.sms.service;
 
 import com.example.sms.entity.Employee;
 import com.example.sms.repository.EmployeeRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeService {

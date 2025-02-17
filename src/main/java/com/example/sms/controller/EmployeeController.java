@@ -3,9 +3,8 @@ package com.example.sms.controller;
 import com.example.sms.dto.EmployeeDto;
 import com.example.sms.entity.Employee;
 import com.example.sms.service.EmployeeService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api")
@@ -19,8 +18,8 @@ public class EmployeeController {
     @GetMapping("/employees")
     public List<EmployeeDto> getAllEmployees() {
         return employeeService.getAllEmployees().stream()
-                .map(employee ->
-                { if (employee == null) {
+                .map(employee -> {
+                    if (employee == null) {
                         return null;
                     } else {
                         return new EmployeeDto(employee, false);
@@ -30,7 +29,10 @@ public class EmployeeController {
 
     @GetMapping("/{firstName}")
     public EmployeeDto getEmployeeByUsername(@PathVariable(name = "firstName") String firstName) {
-        return new EmployeeDto(employeeService.findByFirstName(firstName).stream().findFirst().orElseThrow(),
+        return new EmployeeDto(employeeService.findByFirstName(firstName)
+                .stream()
+                .findFirst()
+                .orElseThrow(),
                 true);
     }
 
