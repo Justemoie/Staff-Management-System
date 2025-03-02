@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,7 +27,7 @@ public class Assignment {
     private String description;
 
     @ManyToMany(mappedBy = "assignments")
-    private List<Employee> employees;
+    private List<Employee> employees = new ArrayList<>();
 
     public Assignment(String title, String description) {
         this.title = title;

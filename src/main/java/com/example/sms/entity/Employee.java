@@ -40,7 +40,7 @@ public class Employee {
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "assignment_id")
     )
-    private List<Assignment> assignments;
+    private List<Assignment> assignments = new ArrayList<>();
 
     public Employee() {}
 
