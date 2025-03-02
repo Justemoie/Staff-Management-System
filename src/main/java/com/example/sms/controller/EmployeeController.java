@@ -3,6 +3,7 @@ package com.example.sms.controller;
 import com.example.sms.dto.request.EmployeeRequest;
 import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.service.EmployeeService;
+import com.example.sms.service.GenericService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,36 +19,44 @@ import java.util.List;
 @RestController
 @RequestMapping("employees")
 public class EmployeeController {
-    private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeService employeeService) {
+    private final EmployeeService employeeService;
+    private final GenericService<EmployeeResponse, EmployeeRequest, Long> genericService;
+
+    public EmployeeController(
+            EmployeeService employeeService,
+            GenericService<EmployeeResponse, EmployeeRequest, Long> genericService) {
+
         this.employeeService = employeeService;
+        this.genericService = genericService;
     }
 
     @GetMapping("/get")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
+        return ResponseEntity.ok(genericService.getAll());
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id) {
-        return ResponseEntity.ok(employeeService.getEmployeeById(id));
+        return ResponseEntity.ok(genericService.getById(id));
     }
 
     @PostMapping("/create")
     public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
-        return ResponseEntity.ok(employeeService.createEmployee(employeeRequest));
+        return ResponseEntity.ok(genericService.create(employeeRequest));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(
-            @PathVariable Long id, @RequestBody EmployeeRequest employeeRequest) {
-        return ResponseEntity.ok(employeeService.updateEmployee(id, employeeRequest));
+            @PathVariable Long id,
+            @RequestBody EmployeeRequest employeeRequest) {
+
+        return ResponseEntity.ok(genericService.update(id, employeeRequest));
     }
 
     @DeleteMapping("/delete/{id}")
     public void deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+        genericService.delete(id);
     }
 
     @GetMapping("/search")

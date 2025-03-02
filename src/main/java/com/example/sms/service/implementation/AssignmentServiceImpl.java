@@ -6,13 +6,15 @@ import com.example.sms.entity.Assignment;
 import com.example.sms.mapper.AssignmentMapper;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.service.AssignmentService;
+import com.example.sms.service.GenericService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
-public class AssignmentServiceImpl implements AssignmentService {
+public class AssignmentServiceImpl implements
+        GenericService<AssignmentResponse, AssignmentRequest, Long>, AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final AssignmentMapper assignmentMapper;
 
@@ -23,21 +25,21 @@ public class AssignmentServiceImpl implements AssignmentService {
         this.assignmentMapper = assignmentMapper;
     }
 
-    public List<AssignmentResponse> getAllAssignments() {
+    public List<AssignmentResponse> getAll() {
         return assignmentMapper.toAssignmentResponseList(assignmentRepository.findAll());
     }
 
-    public AssignmentResponse getAssignmentById(Long id) {
+    public AssignmentResponse getById(Long id) {
         return assignmentMapper.toAssignmentResponse(assignmentRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found")));
     }
 
-    public AssignmentResponse createAssignment(AssignmentRequest assignmentRequest) {
+    public AssignmentResponse create(AssignmentRequest assignmentRequest) {
         return assignmentMapper.toAssignmentResponse(
                 assignmentRepository.save(assignmentMapper.toAssignment(assignmentRequest)));
     }
 
-    public AssignmentResponse updateAssignment(Long id, AssignmentRequest assignmentRequest) {
+    public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
 
@@ -47,7 +49,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         return assignmentMapper.toAssignmentResponse(updatedAssignment);
     }
 
-    public void deleteAssignment(Long id) {
+    public void delete(Long id) {
         assignmentRepository.deleteById(id);
     }
 }
