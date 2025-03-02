@@ -9,4 +9,6 @@ public record EmployeeResponse(
         String phoneNumber,
         String email,
         List<AssignmentResponse> assignments
-) { }
+) {
+    
+}

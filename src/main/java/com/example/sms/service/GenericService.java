@@ -2,14 +2,14 @@ package com.example.sms.service;
 
 import java.util.List;
 
-public interface GenericService<T, RQ, ID> {
+public interface GenericService<T, R, I> {
     List<T> getAll();
 
-    T getById(ID id);
+    T getById(I id);
 
-    T create(RQ requestEntity);
+    T create(R requestEntity);
 
-    T update(ID id, RQ requestEntity);
+    T update(I id, R requestEntity);
 
-    void delete(ID id);
+    void delete(I id);
 }

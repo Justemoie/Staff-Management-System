@@ -1,13 +1,14 @@
 package com.example.sms.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,9 @@ public class Assignment {
 
     @ManyToMany(mappedBy = "assignments")
     private List<Employee> employees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
+    private List<FeedBack> feedBacks = new ArrayList<>();
 
     public Assignment(String title, String description) {
         this.title = title;
@@ -66,5 +70,13 @@ public class Assignment {
 
     public void setEmployees(List<Employee> employees) {
         this.employees = employees;
+    }
+
+    public List<FeedBack> getFeedBacks() {
+        return feedBacks;
+    }
+
+    public void setFeedBacks(List<FeedBack> feedBacks) {
+        this.feedBacks = feedBacks;
     }
 }

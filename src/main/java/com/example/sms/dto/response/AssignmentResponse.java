@@ -1,7 +1,12 @@
 package com.example.sms.dto.response;
 
-public record AssignmentResponse (
+import java.util.List;
+
+public record AssignmentResponse(
         Long id,
         String title,
-        String description
-) {}
+        String description,
+        List<FeedBackResponse> feedBacks
+) {
+
+}

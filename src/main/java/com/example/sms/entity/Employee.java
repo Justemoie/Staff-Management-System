@@ -49,7 +49,6 @@ public class Employee {
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.email = email;
-        this.assignments = new ArrayList<>();
     }
 
     public Long getId() {

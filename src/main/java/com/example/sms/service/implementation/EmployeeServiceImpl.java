@@ -1,20 +1,15 @@
 package com.example.sms.service.implementation;
 
-import com.example.sms.dto.request.AssignmentRequest;
 import com.example.sms.dto.request.EmployeeRequest;
-import com.example.sms.dto.response.AssignmentResponse;
 import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.entity.Assignment;
 import com.example.sms.entity.Employee;
-import com.example.sms.mapper.AssignmentMapper;
 import com.example.sms.mapper.EmployeeMapper;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.service.EmployeeService;
-
-import java.util.ArrayList;
-import java.util.List;
 import com.example.sms.service.GenericService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,16 +20,14 @@ public class EmployeeServiceImpl implements
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
-    private final AssignmentMapper assignmentMapper;
     private final AssignmentRepository assignmentRepository;
 
     public EmployeeServiceImpl(
             EmployeeRepository employeesRepository,
             EmployeeMapper employeeMapper,
-            AssignmentMapper assignmentMapper, AssignmentRepository assignmentRepository) {
+            AssignmentRepository assignmentRepository) {
 
         this.employeeRepository = employeesRepository;
-        this.assignmentMapper = assignmentMapper;
         this.employeeMapper = employeeMapper;
         this.assignmentRepository = assignmentRepository;
     }

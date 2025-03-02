@@ -5,4 +5,6 @@ public record EmployeeRequest(
          String lastName,
          String phoneNumber,
          String email
-) { }
+) {
+
+}
