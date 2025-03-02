@@ -1,9 +1,8 @@
 package com.example.sms.controller;
 
-import com.example.sms.dto.EmployeeDto;
-import com.example.sms.entity.Employee;
+import com.example.sms.dto.request.EmployeeRequest;
+import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.service.EmployeeService;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,9 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("employees")
 public class EmployeeController {
     private final EmployeeService employeeService;
 
@@ -24,58 +24,37 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    @GetMapping("/employees")
-    public List<EmployeeDto> getAllEmployees() {
-        return employeeService.getAllEmployees().stream()
-                .map(employee -> {
-                    if (employee == null) {
-                        return null;
-                    } else {
-                        return new EmployeeDto(employee, false);
-                    }
-                }).toList();
+    @GetMapping("/get")
+    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
+        return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    @GetMapping("/employees/{id}")
-    ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
-        EmployeeDto employee = new EmployeeDto(
-                employeeService.findById(id), true
-        );
-
-        return ResponseEntity.ok(employee);
+    @GetMapping("/get/{id}")
+    public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
-    @GetMapping("/employees/search")
-    public List<EmployeeDto> search(
+    @PostMapping("/create")
+    public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
+        return ResponseEntity.ok(employeeService.createEmployee(employeeRequest));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<EmployeeResponse> updateEmployee(
+            @PathVariable Long id, @RequestBody EmployeeRequest employeeRequest) {
+        return ResponseEntity.ok(employeeService.updateEmployee(id, employeeRequest));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<EmployeeResponse>> searchEmployees(
             @RequestParam(name = "firstName", required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName) {
 
-        List<Employee> employees = employeeService.searchEmployees(firstName, lastName);
-        return employees.stream()
-                .map(e -> new EmployeeDto(e, false))
-                .toList();
-    }
-
-    @PostMapping
-    public EmployeeDto createEmployee(@RequestBody Employee employee) {
-        return new EmployeeDto(employeeService.addEmployee(employee), false);
-    }
-
-    @PutMapping("/employees/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(
-            @PathVariable Long id, @RequestBody Employee employeeRequest) {
-
-        EmployeeDto updatedEmployee = new EmployeeDto(
-                employeeService.updateEmployee(id, employeeRequest), false);
-
-        return ResponseEntity.ok(updatedEmployee);
-    }
-
-    @DeleteMapping("/employees/{id}")
-    public ResponseEntity<EmployeeDto> deleteEmployee(@PathVariable Long id) {
-        EmployeeDto deletedEmployee = new EmployeeDto(employeeService.deleteEmployee(id),
-                false);
-
-        return ResponseEntity.ok(deletedEmployee);
+        return ResponseEntity.ok(employeeService.searchEmployeesByInitials(firstName, lastName));
     }
 }
