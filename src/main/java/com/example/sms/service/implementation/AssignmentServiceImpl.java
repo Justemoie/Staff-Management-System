@@ -3,8 +3,10 @@ package com.example.sms.service.implementation;
 import com.example.sms.dto.request.AssignmentRequest;
 import com.example.sms.dto.response.AssignmentResponse;
 import com.example.sms.entity.Assignment;
+import com.example.sms.entity.Employee;
 import com.example.sms.mapper.AssignmentMapper;
 import com.example.sms.repository.AssignmentRepository;
+import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import org.springframework.http.HttpStatus;
@@ -15,14 +17,19 @@ import java.util.List;
 @Service
 public class AssignmentServiceImpl implements
         GenericService<AssignmentResponse, AssignmentRequest, Long>, AssignmentService {
+
     private final AssignmentRepository assignmentRepository;
     private final AssignmentMapper assignmentMapper;
+    private final EmployeeRepository employeeRepository;
 
     public AssignmentServiceImpl(
-            AssignmentRepository assignmentRepository, AssignmentMapper assignmentMapper) {
+            AssignmentRepository assignmentRepository,
+            AssignmentMapper assignmentMapper,
+            EmployeeRepository employeeRepository) {
 
         this.assignmentRepository = assignmentRepository;
         this.assignmentMapper = assignmentMapper;
+        this.employeeRepository = employeeRepository;
     }
 
     public List<AssignmentResponse> getAll() {
@@ -49,7 +56,15 @@ public class AssignmentServiceImpl implements
         return assignmentMapper.toAssignmentResponse(updatedAssignment);
     }
 
-    public void delete(Long id) {
-        assignmentRepository.deleteById(id);
+    public void delete(Long assignmentId) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Assignment not found with id = " + assignmentId));
+
+        for (Employee employee : employeeRepository.findAll()) {
+            employee.getAssignments().remove(assignment);
+        }
+
+        assignmentRepository.deleteById(assignmentId);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.sms.controller;
 
+import com.example.sms.dto.request.AssignmentRequest;
 import com.example.sms.dto.request.EmployeeRequest;
 import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.service.EmployeeService;
@@ -65,5 +66,16 @@ public class EmployeeController {
             @RequestParam(name = "lastName", required = false) String lastName) {
 
         return ResponseEntity.ok(employeeService.searchEmployeesByInitials(firstName, lastName));
+    }
+
+    @PostMapping("/addAssignment/{employeeId}/{assignmentId}")
+    public ResponseEntity<EmployeeResponse> addAssignment(
+            @PathVariable Long employeeId, @PathVariable Long assignmentId) {
+        return ResponseEntity.ok(employeeService.addAssignmentToEmployee(employeeId, assignmentId));
+    }
+
+    @DeleteMapping("/deleteAssignment/{employeeId}/{assignmentId}")
+    public void deleteAssignment(@PathVariable Long employeeId, @PathVariable Long assignmentId) {
+        employeeService.deleteAssignmentFromEmployee(employeeId, assignmentId);
     }
 }
