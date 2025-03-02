@@ -93,7 +93,7 @@ public class EmployeeServiceImpl implements
     public EmployeeResponse addAssignmentToEmployee(Long employeeId, Long assignmentId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Employee not found with id = " + employeeId));
+                        HttpStatus.NOT_FOUND, "Employee not found with such id = " + employeeId));
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -108,11 +108,11 @@ public class EmployeeServiceImpl implements
     public EmployeeResponse deleteAssignmentFromEmployee(Long employeeId, Long assignmentId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Employee not found with id = " + employeeId));
+                        HttpStatus.NOT_FOUND, "Employee not found with Id = " + employeeId));
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Assignment not found with id = " + assignmentId));
+                        HttpStatus.NOT_FOUND, "Assignment not found with Id = " + assignmentId));
 
         employee.getAssignments().remove(assignment);
 
