@@ -3,19 +3,13 @@ package com.example.sms.controller;
 import com.example.sms.dto.request.AssignmentRequest;
 import com.example.sms.dto.request.FeedBackRequest;
 import com.example.sms.dto.response.AssignmentResponse;
+import com.example.sms.dto.response.FeedBackResponse;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("assignments")
@@ -62,15 +56,23 @@ public class AssignmentController {
         genericService.delete(id);
     }
 
-    @PostMapping("/addFeedBack/{id}")
+    @PostMapping("/{id}/addFeedBack")
     public ResponseEntity<AssignmentResponse> addFeedBack(
             @PathVariable Long id, @RequestBody FeedBackRequest feedBackRequest) {
         return ResponseEntity.ok(assignmentService.addFeedBack(id, feedBackRequest));
     }
 
-    @DeleteMapping("/deleteFeedBack/{assignmentId}/{feedBackId}")
+    @DeleteMapping("/{assignmentId}/deleteFeedBack/{feedBackId}")
     public ResponseEntity<AssignmentResponse> deleteFeedBack(
             @PathVariable Long assignmentId, @PathVariable Long feedBackId) {
         return ResponseEntity.ok(assignmentService.deleteFeedBack(assignmentId, feedBackId));
+    }
+
+    @PatchMapping("/{assignmentId}/feedBackToUpdate/{feedBackId}")
+    public ResponseEntity<FeedBackResponse> updateFeedBack(
+            @PathVariable Long assignmentId,
+            @PathVariable Long feedBackId,
+            @RequestBody FeedBackRequest feedBackRequest) {
+        return ResponseEntity.ok(assignmentService.updateFeedBack(assignmentId, feedBackId, feedBackRequest));
     }
 }

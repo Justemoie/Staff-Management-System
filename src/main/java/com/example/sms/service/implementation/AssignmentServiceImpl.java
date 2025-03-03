@@ -3,6 +3,7 @@ package com.example.sms.service.implementation;
 import com.example.sms.dto.request.AssignmentRequest;
 import com.example.sms.dto.request.FeedBackRequest;
 import com.example.sms.dto.response.AssignmentResponse;
+import com.example.sms.dto.response.FeedBackResponse;
 import com.example.sms.entity.Assignment;
 import com.example.sms.entity.Employee;
 import com.example.sms.entity.FeedBack;
@@ -107,10 +108,37 @@ public class AssignmentServiceImpl implements
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Feedback not found with such id = " + feedBackId));
 
-        assignment.getFeedBacks().remove(feedBack);
+        if (!assignment.getFeedBacks().contains(feedBack)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Assignment with id = " + assignmentId +
+                            " does not contain feedback with id = " + feedBackId);
+        }
 
+        assignment.getFeedBacks().remove(feedBack);
         feedBackRepository.delete(feedBack);
 
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(assignment));
     }
+
+    @Override
+    public FeedBackResponse updateFeedBack(
+            Long assignmentId, Long feedBackId, FeedBackRequest feedBackRequest) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Assignment not found"));
+
+        FeedBack feedBack = feedBackRepository.findById(feedBackId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Feedback not found"));
+
+        if (!feedBack.getAssignment().equals(assignment)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Feedback does not belong to the given assignment");
+        }
+
+        feedBackMapper.partialUpdate(feedBackRequest, feedBack);
+
+        return feedBackMapper.toFeedBackResponse(feedBackRepository.save(feedBack));
+    }
+
 }

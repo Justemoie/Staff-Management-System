@@ -68,13 +68,13 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.searchEmployeesByInitials(firstName, lastName));
     }
 
-    @PostMapping("/addAssignment/{employeeId}/{assignmentId}")
+    @PostMapping("/{employeeId}/addAssignment/{assignmentId}")
     public ResponseEntity<EmployeeResponse> addAssignment(
             @PathVariable Long employeeId, @PathVariable Long assignmentId) {
         return ResponseEntity.ok(employeeService.addAssignmentToEmployee(employeeId, assignmentId));
     }
 
-    @DeleteMapping("/deleteAssignment/{employeeId}/{assignmentId}")
+    @DeleteMapping("/{employeeId}/deleteAssignment/{assignmentId}")
     public void deleteAssignment(@PathVariable Long employeeId, @PathVariable Long assignmentId) {
         employeeService.deleteAssignmentFromEmployee(employeeId, assignmentId);
     }

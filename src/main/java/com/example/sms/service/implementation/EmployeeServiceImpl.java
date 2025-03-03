@@ -99,6 +99,12 @@ public class EmployeeServiceImpl implements
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with id = " + assignmentId));
 
+        if (employee.getAssignments().contains(assignment)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Employee with id = " + employeeId +
+                            " already has assignment with id = " + assignmentId);
+        }
+
         employee.getAssignments().add(assignment);
 
         return employeeMapper.toEmployeeResponse(employeeRepository.save(employee));
@@ -113,6 +119,12 @@ public class EmployeeServiceImpl implements
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with Id = " + assignmentId));
+
+        if (!employee.getAssignments().contains(assignment)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Employee with id = " + employeeId +
+                            " does not have assignment with id = " + assignmentId);
+        }
 
         employee.getAssignments().remove(assignment);
 
