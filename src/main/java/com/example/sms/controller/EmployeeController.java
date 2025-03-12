@@ -31,12 +31,12 @@ public class EmployeeController {
         this.genericService = genericService;
     }
 
-    @GetMapping("/get")
+    @GetMapping("/all")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
         return ResponseEntity.ok(genericService.getAll());
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id) {
         return ResponseEntity.ok(genericService.getById(id));
     }

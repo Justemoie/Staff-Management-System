@@ -37,12 +37,12 @@ public class AssignmentController {
         this.assignmentRepository = assignmentRepository;
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     public ResponseEntity<List<AssignmentResponse>> getAllAssignments() {
         return ResponseEntity.ok(genericService.getAll());
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<AssignmentResponse> getAssignmentById(@PathVariable Long id) {
         return ResponseEntity.ok(genericService.getById(id));
     }
@@ -53,13 +53,13 @@ public class AssignmentController {
         return ResponseEntity.ok(genericService.create(assignmentRequest));
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<AssignmentResponse> updateAssignment(
             @PathVariable Long id, @RequestBody AssignmentRequest assignmentRequest) {
         return ResponseEntity.ok(genericService.update(id, assignmentRequest));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteAssignment(@PathVariable Long id) {
         genericService.delete(id);
     }
