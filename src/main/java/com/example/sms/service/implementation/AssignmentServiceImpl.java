@@ -63,7 +63,7 @@ public class AssignmentServiceImpl implements
     @Override
     public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found with such id"));
 
         Assignment updatedAssignment = assignmentRepository.save(
                 assignmentMapper.partialUpdate(assignmentRequest, assignment));
