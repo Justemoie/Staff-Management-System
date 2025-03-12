@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assignment_feedbacks")
+@Table(name = "feedbacks")
 public class FeedBack {
 
     @Id
@@ -20,9 +20,6 @@ public class FeedBack {
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
-
-    @Column(name = "author")
-    private String author;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -34,11 +31,11 @@ public class FeedBack {
     public FeedBack() {}
 
     public FeedBack(
-            Long id, String comment, String author,
-            LocalDateTime createdAt, Assignment assignment) {
+            Long id, String comment,
+            LocalDateTime createdAt,
+            Assignment assignment) {
         this.id = id;
         this.comment = comment;
-        this.author = author;
         this.createdAt = createdAt;
         this.assignment = assignment;
     }
@@ -49,10 +46,6 @@ public class FeedBack {
 
     public String getComment() {
         return comment;
-    }
-
-    public String getAuthor() {
-        return author;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -69,10 +62,6 @@ public class FeedBack {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

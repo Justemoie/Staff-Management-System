@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public record FeedBackRequest(
      String comment,
-     String author,
      LocalDateTime createdAt
 ) {
     
