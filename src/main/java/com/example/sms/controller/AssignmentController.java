@@ -70,13 +70,13 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentService.addFeedBack(id, feedBackRequest));
     }
 
-    @DeleteMapping("/{assignmentId}/deleteFeedBack/{feedBackId}")
+    @DeleteMapping("/{assignmentId}/feedbacks/{feedBackId}")
     public ResponseEntity<AssignmentResponse> deleteFeedBack(
             @PathVariable Long assignmentId, @PathVariable Long feedBackId) {
         return ResponseEntity.ok(assignmentService.deleteFeedBack(assignmentId, feedBackId));
     }
 
-    @PatchMapping("/{assignmentId}/feedBackToUpdate/{feedBackId}")
+    @PatchMapping("/{assignmentId}/feedbacks/{feedBackId}")
     public ResponseEntity<FeedBackResponse> updateFeedBack(
             @PathVariable Long assignmentId,
             @PathVariable Long feedBackId,
