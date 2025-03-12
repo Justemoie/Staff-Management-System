@@ -102,7 +102,8 @@ public class AssignmentServiceImpl implements
     public AssignmentResponse deleteFeedBack(Long assignmentId, Long feedBackId) {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Assignment not found with such id = " + assignmentId));
+                        HttpStatus.NOT_FOUND,
+                        "Assignment not found with such id = " + assignmentId));
 
         FeedBack feedBack = feedBackRepository.findById(feedBackId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -110,8 +111,8 @@ public class AssignmentServiceImpl implements
 
         if (!assignment.getFeedBacks().contains(feedBack)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Assignment with id = " + assignmentId +
-                            " does not contain feedback with id = " + feedBackId);
+                    "Assignment with id = " + assignmentId
+                            + " does not contain feedback with id = " + feedBackId);
         }
 
         assignment.getFeedBacks().remove(feedBack);

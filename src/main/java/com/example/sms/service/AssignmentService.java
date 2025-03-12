@@ -9,5 +9,7 @@ public interface AssignmentService {
 
     AssignmentResponse deleteFeedBack(Long assignmentId, Long feedBackId);
 
-    FeedBackResponse updateFeedBack(Long assignmentId, Long feedBackId, FeedBackRequest feedBackRequest);
+    FeedBackResponse updateFeedBack(Long assignmentId,
+                                    Long feedBackId,
+                                    FeedBackRequest feedBackRequest);
 }

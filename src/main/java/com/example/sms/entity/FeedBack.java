@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assignment_feedback")
+@Table(name = "assignment_feedbacks")
 public class FeedBack {
 
     @Id

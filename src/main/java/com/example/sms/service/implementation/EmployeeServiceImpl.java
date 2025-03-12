@@ -101,8 +101,8 @@ public class EmployeeServiceImpl implements
 
         if (employee.getAssignments().contains(assignment)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Employee with id = " + employeeId +
-                            " already has assignment with id = " + assignmentId);
+                    "Employee with id = " + employeeId
+                            + " already has assignment with id = " + assignmentId);
         }
 
         employee.getAssignments().add(assignment);
@@ -122,8 +122,8 @@ public class EmployeeServiceImpl implements
 
         if (!employee.getAssignments().contains(assignment)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Employee with id = " + employeeId +
-                            " does not have assignment with id = " + assignmentId);
+                    "Employee with id = " + employeeId
+                            + " does not have assignment with id = " + assignmentId);
         }
 
         employee.getAssignments().remove(assignment);
