@@ -10,23 +10,28 @@ import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.service.EmployeeService;
 import com.example.sms.service.GenericService;
 import java.util.List;
+import java.util.Objects;
+import com.example.sms.utils.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 
 @Service
 public class EmployeeServiceImpl implements
         GenericService<EmployeeResponse, EmployeeRequest, Long>, EmployeeService {
 
+    private final Cache<Long, EmployeeResponse> cache;
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
     private final AssignmentRepository assignmentRepository;
 
-    public EmployeeServiceImpl(
+    public EmployeeServiceImpl(Cache<Long, EmployeeResponse> cache,
             EmployeeRepository employeesRepository,
             EmployeeMapper employeeMapper,
             AssignmentRepository assignmentRepository) {
 
+        this.cache = cache;
         this.employeeRepository = employeesRepository;
         this.employeeMapper = employeeMapper;
         this.assignmentRepository = assignmentRepository;
@@ -39,10 +44,15 @@ public class EmployeeServiceImpl implements
 
     @Override
     public EmployeeResponse getById(Long id) {
+        if(cache.containsKey(id)) {
+            return cache.get(id);
+        }
+
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Employee not found with such id = " + id));
 
+        cache.put(id, employeeMapper.toEmployeeResponse(employee));
         return employeeMapper.toEmployeeResponse(employee);
     }
 
@@ -58,10 +68,12 @@ public class EmployeeServiceImpl implements
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Employee not found with id = " + id));
 
-        Employee updatedEmployee = employeeRepository.save(
-                employeeMapper.partialUpdate(employeeRequest, employeeToUpdate));
+        Employee employee = employeeMapper.partialUpdate(employeeRequest, employeeToUpdate);
+        Employee updatedEmployee = saveUpdates(employee);
 
-        return employeeMapper.toEmployeeResponse(updatedEmployee);
+        var employeeResponse = employeeMapper.toEmployeeResponse(updatedEmployee);
+
+        return employeeResponse;
     }
 
     @Override
@@ -70,23 +82,54 @@ public class EmployeeServiceImpl implements
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Employee not found with id = " + id);
         }
+        cache.remove(id);
         employeeRepository.deleteById(id);
     }
 
     @Override
-    public List<EmployeeResponse> searchEmployeesByInitials(String firstName, String lastName) {
-        if (firstName != null && lastName != null) {
-            return employeeMapper.toEmployeeResponseList(
-                    employeeRepository.findByFirstNameAndLastName(firstName, lastName));
-        } else if (firstName != null) {
-            return employeeMapper.toEmployeeResponseList(
-                    employeeRepository.findByFirstName(firstName));
-        } else if (lastName != null) {
-            return employeeMapper.toEmployeeResponseList(
-                    employeeRepository.findByLastName(lastName));
-        } else {
-            return employeeMapper.toEmployeeResponseList(employeeRepository.findAll());
+    public List<EmployeeResponse> searchEmployeesByFirstName(String firstName) {
+        var employees = employeeMapper.toEmployeeResponseList(employeeRepository.findByFirstName(firstName));
+
+        if (employees.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
         }
+
+        List<EmployeeResponse> cachedEmployees = employees.stream()
+                .map(employee -> cache.get(employee.id()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (cachedEmployees.size() == employees.size()) {
+            return cachedEmployees;
+        }
+
+        employees.forEach(employee -> cache.put(employee.id(), employee));
+
+        return employees;
+    }
+
+    @Override
+    public List<EmployeeResponse> searchEmployeesByInitials(String firstName, String lastName) {
+        var employees = employeeMapper.toEmployeeResponseList(
+                    employeeRepository.findByFirstNameAndLastName(firstName, lastName));
+
+        if (employees.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
+        }
+
+        List<EmployeeResponse> cachedEmployees = employees.stream()
+                .map(employee -> cache.get(employee.id()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (cachedEmployees.size() == employees.size()) {
+            return cachedEmployees;
+        }
+
+        employees.forEach(employee -> cache.put(employee.id(), employee));
+
+
+        return employees;
     }
 
     @Override
@@ -107,7 +150,7 @@ public class EmployeeServiceImpl implements
 
         employee.getAssignments().add(assignment);
 
-        return employeeMapper.toEmployeeResponse(employeeRepository.save(employee));
+        return employeeMapper.toEmployeeResponse(saveUpdates(employee));
     }
 
     @Override
@@ -128,6 +171,13 @@ public class EmployeeServiceImpl implements
 
         employee.getAssignments().remove(assignment);
 
-        return employeeMapper.toEmployeeResponse(employeeRepository.save(employee));
+        return employeeMapper.toEmployeeResponse(saveUpdates(employee));
+    }
+
+    private Employee saveUpdates(Employee employee) {
+        if(cache.containsKey(employee.getId())) {
+            cache.put(employee.getId(), employeeMapper.toEmployeeResponse(employee));
+        }
+        return employeeRepository.save(employee);
     }
 }

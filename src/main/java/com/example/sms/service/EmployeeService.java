@@ -4,6 +4,8 @@ import com.example.sms.dto.response.EmployeeResponse;
 import java.util.List;
 
 public interface EmployeeService {
+    List<EmployeeResponse> searchEmployeesByFirstName(String firstName);
+
     List<EmployeeResponse> searchEmployeesByInitials(String firstName, String lastName);
 
     EmployeeResponse addAssignmentToEmployee(Long employeeId, Long assignmentId);

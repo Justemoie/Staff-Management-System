@@ -15,6 +15,8 @@ import com.example.sms.repository.FeedBackRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import java.util.List;
+
+import com.example.sms.utils.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,14 +30,16 @@ public class AssignmentServiceImpl implements
     private final EmployeeRepository employeeRepository;
     private final FeedBackMapper feedBackMapper;
     private final FeedBackRepository feedBackRepository;
+    private final Cache<Long, AssignmentResponse> cache;
 
-    public AssignmentServiceImpl(
+    public AssignmentServiceImpl(Cache<Long, AssignmentResponse> cache,
             AssignmentRepository assignmentRepository,
             AssignmentMapper assignmentMapper,
             EmployeeRepository employeeRepository,
             FeedBackMapper feedBackMapper,
             FeedBackRepository feedBackRepository) {
 
+        this.cache = cache;
         this.assignmentRepository = assignmentRepository;
         this.assignmentMapper = assignmentMapper;
         this.employeeRepository = employeeRepository;
@@ -50,8 +54,17 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse getById(Long id) {
-        return assignmentMapper.toAssignmentResponse(assignmentRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found")));
+        if(cache.containsKey(id)) {
+            return cache.get(id);
+        }
+
+        var assignment = assignmentMapper.toAssignmentResponse(assignmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Assignment not found")));
+
+        cache.put(id, assignment);
+
+        return assignment;
     }
 
     @Override
@@ -62,12 +75,12 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
-        Assignment assignment = assignmentRepository.findById(id).orElseThrow(
+        Assignment assignmentToUpdate = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with such id"));
 
-        Assignment updatedAssignment = assignmentRepository.save(
-                assignmentMapper.partialUpdate(assignmentRequest, assignment));
+        Assignment assignment = assignmentMapper.partialUpdate(assignmentRequest, assignmentToUpdate);
+        Assignment updatedAssignment = saveUpdates(assignment);
 
         return assignmentMapper.toAssignmentResponse(updatedAssignment);
     }
@@ -82,6 +95,8 @@ public class AssignmentServiceImpl implements
             employee.getAssignments().remove(assignment);
         }
 
+        cache.remove(assignmentId);
+
         assignmentRepository.deleteById(assignmentId);
     }
 
@@ -90,13 +105,12 @@ public class AssignmentServiceImpl implements
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with id = " + assignmentId));
 
-
         FeedBack feedBack = feedBackMapper.toFeedBack(feedBackRequest);
         feedBack.setAssignment(assignment);
 
         assignment.getFeedBacks().add(feedBack);
 
-        return assignmentMapper.toAssignmentResponse(assignmentRepository.save(assignment));
+        return assignmentMapper.toAssignmentResponse(saveUpdates(assignment));
     }
 
     @Override
@@ -119,7 +133,7 @@ public class AssignmentServiceImpl implements
         assignment.getFeedBacks().remove(feedBack);
         feedBackRepository.delete(feedBack);
 
-        return assignmentMapper.toAssignmentResponse(assignmentRepository.save(assignment));
+        return assignmentMapper.toAssignmentResponse(saveUpdates(assignment));
     }
 
     @Override
@@ -129,18 +143,26 @@ public class AssignmentServiceImpl implements
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found"));
 
-        FeedBack feedBack = feedBackRepository.findById(feedBackId)
+        FeedBack feedBackToUpdate = feedBackRepository.findById(feedBackId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Feedback not found"));
 
-        if (!feedBack.getAssignment().equals(assignment)) {
+        if (!feedBackToUpdate.getAssignment().equals(assignment)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Feedback does not belong to the given assignment");
         }
 
-        feedBackMapper.partialUpdate(feedBackRequest, feedBack);
+        FeedBack feedBack = feedBackMapper.partialUpdate(feedBackRequest, feedBackToUpdate);
+        saveUpdates(assignment);
 
         return feedBackMapper.toFeedBackResponse(feedBackRepository.save(feedBack));
     }
 
+    private Assignment saveUpdates(Assignment assignment) {
+        var assignmentToSave = assignmentRepository.save(assignment);
+        if(cache.containsKey(assignment.getId())) {
+            cache.put(assignment.getId(), assignmentMapper.toAssignmentResponse(assignment));
+        }
+        return assignmentToSave;
+    }
 }

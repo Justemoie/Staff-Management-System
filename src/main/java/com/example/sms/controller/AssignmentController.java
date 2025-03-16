@@ -53,13 +53,13 @@ public class AssignmentController {
         return ResponseEntity.ok(genericService.create(assignmentRequest));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<AssignmentResponse> updateAssignment(
             @PathVariable Long id, @RequestBody AssignmentRequest assignmentRequest) {
         return ResponseEntity.ok(genericService.update(id, assignmentRequest));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public void deleteAssignment(@PathVariable Long id) {
         genericService.delete(id);
     }
