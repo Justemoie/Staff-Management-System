@@ -6,7 +6,9 @@ import java.util.List;
 public interface EmployeeService {
     List<EmployeeResponse> searchEmployeesByFirstName(String firstName);
 
-    List<EmployeeResponse> searchEmployeesByInitials(String firstName, String lastName);
+    List<EmployeeResponse> searchEmployeesByLastName(String lastName);
+
+    List<EmployeeResponse> searchEmployeesByAssignmentId(Long assignmentId);
 
     EmployeeResponse addAssignmentToEmployee(Long employeeId, Long assignmentId);
 

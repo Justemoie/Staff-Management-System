@@ -67,12 +67,11 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.searchEmployeesByFirstName(firstName));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search-by-last-name")
     public ResponseEntity<List<EmployeeResponse>> searchEmployees(
-            @RequestParam(name = "firstName", required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName) {
 
-        return ResponseEntity.ok(employeeService.searchEmployeesByInitials(firstName, lastName));
+        return ResponseEntity.ok(employeeService.searchEmployeesByLastName(lastName));
     }
 
     @PostMapping("/{employeeId}/add-assignment/{assignmentId}")
@@ -84,5 +83,12 @@ public class EmployeeController {
     @DeleteMapping("/{employeeId}/delete-assignment/{assignmentId}")
     public void deleteAssignment(@PathVariable Long employeeId, @PathVariable Long assignmentId) {
         employeeService.deleteAssignmentFromEmployee(employeeId, assignmentId);
+    }
+
+    @GetMapping("/search-by-assignment/{id}")
+    public ResponseEntity<List<EmployeeResponse>> searchByAssignmentTitle(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(employeeService.searchEmployeesByAssignmentId(id));
     }
 }

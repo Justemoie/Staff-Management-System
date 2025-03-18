@@ -90,46 +90,15 @@ public class EmployeeServiceImpl implements
     public List<EmployeeResponse> searchEmployeesByFirstName(String firstName) {
         var employees = employeeMapper.toEmployeeResponseList(employeeRepository.findByFirstName(firstName));
 
-        if (employees.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
-        }
-
-        List<EmployeeResponse> cachedEmployees = employees.stream()
-                .map(employee -> cache.get(employee.id()))
-                .filter(Objects::nonNull)
-                .toList();
-
-        if (cachedEmployees.size() == employees.size()) {
-            return cachedEmployees;
-        }
-
-        employees.forEach(employee -> cache.put(employee.id(), employee));
-
-        return employees;
+        return getEmployeeResponses(employees);
     }
 
     @Override
-    public List<EmployeeResponse> searchEmployeesByInitials(String firstName, String lastName) {
+    public List<EmployeeResponse> searchEmployeesByAssignmentId(Long id) {
         var employees = employeeMapper.toEmployeeResponseList(
-                    employeeRepository.findByFirstNameAndLastName(firstName, lastName));
+                employeeRepository.findEmployeesByAssignmentId(id));
 
-        if (employees.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
-        }
-
-        List<EmployeeResponse> cachedEmployees = employees.stream()
-                .map(employee -> cache.get(employee.id()))
-                .filter(Objects::nonNull)
-                .toList();
-
-        if (cachedEmployees.size() == employees.size()) {
-            return cachedEmployees;
-        }
-
-        employees.forEach(employee -> cache.put(employee.id(), employee));
-
-
-        return employees;
+        return getEmployeeResponses(employees);
     }
 
     @Override
@@ -151,6 +120,34 @@ public class EmployeeServiceImpl implements
         employee.getAssignments().add(assignment);
 
         return employeeMapper.toEmployeeResponse(saveUpdates(employee));
+    }
+
+    @Override
+    public List<EmployeeResponse> searchEmployeesByLastName(String lastName) {
+        var employees = employeeMapper.toEmployeeResponseList(
+                employeeRepository.findByLastName(lastName));
+
+        return getEmployeeResponses(employees);
+    }
+
+    private List<EmployeeResponse> getEmployeeResponses(List<EmployeeResponse> employees) {
+        if (employees.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
+        }
+
+        List<EmployeeResponse> cachedEmployees = employees.stream()
+                .map(employee -> cache.get(employee.id()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (cachedEmployees.size() == employees.size()) {
+            return cachedEmployees;
+        }
+
+        employees.forEach(employee -> cache.put(employee.id(), employee));
+
+
+        return employees;
     }
 
     @Override
