@@ -22,8 +22,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             @Param("last_name") String lastName);
 
 
-    @Query(value = "SELECT e.* " +
-            "FROM employees e " +
+    @Query(value = "SELECT e.* FROM employees e " +
             "LEFT JOIN employee_assignments ea ON e.id = ea.employee_id " +
             "LEFT JOIN assignments a ON ea.assignment_id = a.id " +
             "WHERE (:assignmentId IS NULL OR a.id = :assignmentId)",
@@ -34,3 +33,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Employee save(Employee employee);
 }
+

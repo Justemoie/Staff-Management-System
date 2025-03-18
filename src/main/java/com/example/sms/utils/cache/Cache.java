@@ -28,12 +28,6 @@ public class Cache<K, V> {
         }
     }
 
-    public Cache() {
-        this.capacity = 3;
-        this.cache = new HashMap<>();
-        logger.info("Cache initialized with capacity {}", capacity);
-    }
-
     public V get(K key) {
         CacheEntry<V> entry = cache.get(key);
         if (entry != null) {
@@ -97,5 +91,11 @@ public class Cache<K, V> {
         } else {
             logger.info("Key: {} not found in cache", key);
         }
+    }
+
+    public Cache() {
+        this.capacity = 3;
+        this.cache = new HashMap<>();
+        logger.info("Cache initialized with capacity {}", capacity);
     }
 }
