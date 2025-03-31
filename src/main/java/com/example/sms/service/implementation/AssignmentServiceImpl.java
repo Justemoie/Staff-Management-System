@@ -7,6 +7,7 @@ import com.example.sms.dto.response.FeedBackResponse;
 import com.example.sms.entity.Assignment;
 import com.example.sms.entity.Employee;
 import com.example.sms.entity.FeedBack;
+import com.example.sms.exception.ConflictException;
 import com.example.sms.mapper.AssignmentMapper;
 import com.example.sms.mapper.FeedBackMapper;
 import com.example.sms.repository.AssignmentRepository;
@@ -15,7 +16,6 @@ import com.example.sms.repository.FeedBackRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import java.util.List;
-
 import com.example.sms.utils.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -69,12 +69,18 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse create(AssignmentRequest assignmentRequest) {
+        if(assignmentRepository.existsByTitle(assignmentRequest.title())) {
+            throw new ConflictException("Title " + assignmentRequest.title() + " is already in use");
+        }
         return assignmentMapper.toAssignmentResponse(
                 assignmentRepository.save(assignmentMapper.toAssignment(assignmentRequest)));
     }
 
     @Override
     public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
+        if(assignmentRepository.existsByTitle(assignmentRequest.title())) {
+            throw new ConflictException("Title " + assignmentRequest.title() + " is already in use");
+        }
         Assignment assignmentToUpdate = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with such id"));

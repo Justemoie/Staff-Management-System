@@ -5,6 +5,8 @@ import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.service.EmployeeService;
 import com.example.sms.service.GenericService;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,14 +45,14 @@ public class EmployeeController {
 
     @PostMapping("/create")
     public ResponseEntity<EmployeeResponse> createEmployee(
-            @RequestBody EmployeeRequest employeeRequest) {
+            @Valid @RequestBody EmployeeRequest employeeRequest) {
         return ResponseEntity.ok(genericService.create(employeeRequest));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(
             @PathVariable Long id,
-            @RequestBody EmployeeRequest employeeRequest) {
+            @Valid @RequestBody EmployeeRequest employeeRequest) {
 
         return ResponseEntity.ok(genericService.update(id, employeeRequest));
     }

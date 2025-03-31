@@ -14,4 +14,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     Optional<Assignment> findById(long id);
 
     Assignment save(Assignment assignment);
+
+    boolean existsByTitle(String title);
 }

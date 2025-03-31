@@ -8,6 +8,8 @@ import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,13 +51,14 @@ public class AssignmentController {
 
     @PostMapping("/create")
     public ResponseEntity<AssignmentResponse> createAssignment(
-            @RequestBody AssignmentRequest assignmentRequest) {
+            @Valid @RequestBody AssignmentRequest assignmentRequest) {
         return ResponseEntity.ok(genericService.create(assignmentRequest));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<AssignmentResponse> updateAssignment(
-            @PathVariable Long id, @RequestBody AssignmentRequest assignmentRequest) {
+            @PathVariable Long id,
+            @Valid @RequestBody AssignmentRequest assignmentRequest) {
         return ResponseEntity.ok(genericService.update(id, assignmentRequest));
     }
 
@@ -66,7 +69,8 @@ public class AssignmentController {
 
     @PostMapping("/{id}/addFeedBack")
     public ResponseEntity<AssignmentResponse> addFeedBack(
-            @PathVariable Long id, @RequestBody FeedBackRequest feedBackRequest) {
+            @PathVariable Long id,
+            @Valid @RequestBody FeedBackRequest feedBackRequest) {
         return ResponseEntity.ok(assignmentService.addFeedBack(id, feedBackRequest));
     }
 
@@ -80,7 +84,7 @@ public class AssignmentController {
     public ResponseEntity<FeedBackResponse> updateFeedBack(
             @PathVariable Long assignmentId,
             @PathVariable Long feedBackId,
-            @RequestBody FeedBackRequest feedBackRequest) {
+            @Valid @RequestBody FeedBackRequest feedBackRequest) {
         return ResponseEntity.ok(assignmentService.updateFeedBack(
                 assignmentId,
                 feedBackId,

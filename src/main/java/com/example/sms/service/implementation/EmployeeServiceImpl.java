@@ -4,6 +4,7 @@ import com.example.sms.dto.request.EmployeeRequest;
 import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.entity.Assignment;
 import com.example.sms.entity.Employee;
+import com.example.sms.exception.ConflictException;
 import com.example.sms.mapper.EmployeeMapper;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.repository.EmployeeRepository;
@@ -58,12 +59,23 @@ public class EmployeeServiceImpl implements
 
     @Override
     public EmployeeResponse create(EmployeeRequest employeeRequest) {
+        if (employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber())) {
+            throw new ConflictException("Phone number " + employeeRequest.phoneNumber() + " is already in use");
+        } else if (employeeRepository.existsByEmail(employeeRequest.email())) {
+            throw new ConflictException("Email " + employeeRequest.email() + " is already in use");
+        }
         return employeeMapper.toEmployeeResponse(
                 employeeRepository.save(employeeMapper.toEmployee(employeeRequest)));
     }
 
     @Override
     public EmployeeResponse update(Long id, EmployeeRequest employeeRequest) {
+        if (employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber())) {
+            throw new ConflictException("Phone number " + employeeRequest.phoneNumber() + " is already in use");
+        }  else if (employeeRepository.existsByEmail(employeeRequest.email())) {
+            throw new ConflictException("Email " + employeeRequest.email() + " is already in use");
+        }
+
         Employee employeeToUpdate = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Employee not found with id = " + id));
