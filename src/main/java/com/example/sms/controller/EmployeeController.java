@@ -46,6 +46,14 @@ public class EmployeeController {
         return ResponseEntity.ok(genericService.create(employeeRequest));
     }
 
+    @PostMapping("/bulk")
+    @Operation(summary = "Upsert a list of employees")
+    public ResponseEntity<List<EmployeeResponse>> upsertEmployees(
+            @Valid @RequestBody List<EmployeeRequest> employeeRequests) {
+        List<EmployeeResponse> responses = employeeService.bulkUpsertEmployees(employeeRequests);
+        return ResponseEntity.ok(responses);
+    }
+
     @PutMapping("/update/{id}")
     @Operation(summary = "Update an employee")
     public ResponseEntity<EmployeeResponse> updateEmployee(

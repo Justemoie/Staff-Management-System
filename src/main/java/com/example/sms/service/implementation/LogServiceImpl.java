@@ -4,7 +4,6 @@ import com.example.sms.service.LogService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
@@ -18,15 +17,25 @@ import java.time.format.DateTimeParseException;
 @Service
 public class LogServiceImpl implements LogService {
 
+    private final Path logDir;
+
+    public LogServiceImpl() {
+        this.logDir = Paths.get("logs");
+    }
+
+    // Конструктор для тестов
+    public LogServiceImpl(Path logDir) {
+        this.logDir = logDir;
+    }
+
     @PostConstruct
     public void init() {
         try {
-            Path logDir = Paths.get("logs");
             if (!Files.exists(logDir)) {
                 Files.createDirectories(logDir);
             }
 
-            Path invalidDateFile = Paths.get("logs/invalid-date.txt");
+            Path invalidDateFile = logDir.resolve("invalid-date.txt");
             if (!Files.exists(invalidDateFile)) {
                 Files.writeString(invalidDateFile, "Invalid date format. Please use yyyy-MM-dd (e.g., 2025-03-31).");
             }
@@ -40,13 +49,11 @@ public class LogServiceImpl implements LogService {
         LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
         File logFile;
 
-        // Если запрашивается текущий день, используем logs/app.log
         if (logDate.equals(LocalDate.now())) {
-            logFile = new File("logs/app.log");
+            logFile = logDir.resolve("app.log").toFile();
         } else {
-            // Для прошлых дней используем архивный файл
-            String logFileName = "logs/app." + logDate.format(DateTimeFormatter.ISO_LOCAL_DATE) + ".log";
-            logFile = new File(logFileName);
+            String logFileName = "app." + logDate.format(DateTimeFormatter.ISO_LOCAL_DATE) + ".log";
+            logFile = logDir.resolve(logFileName).toFile();
         }
 
         if (!logFile.exists()) {
@@ -58,6 +65,6 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public Resource getInvalidDateResource() {
-        return new FileSystemResource(new File("logs/invalid-date.txt"));
+        return new FileSystemResource(logDir.resolve("invalid-date.txt").toFile());
     }
 }

@@ -12,6 +12,8 @@ import com.example.sms.service.EmployeeService;
 import com.example.sms.service.GenericService;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.example.sms.utils.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -181,6 +183,68 @@ public class EmployeeServiceImpl implements
         employee.getAssignments().remove(assignment);
 
         return employeeMapper.toEmployeeResponse(saveUpdates(employee));
+    }
+
+    @Override
+    public List<EmployeeResponse> bulkUpsertEmployees(List<EmployeeRequest> employeeRequests) {
+        return employeeRequests.stream()
+                .map(this::processEmployeeRequest)
+                .collect(Collectors.toList());
+    }
+
+    private EmployeeResponse processEmployeeRequest(EmployeeRequest employeeRequest) {
+        Employee existingEmployee = findExistingEmployee(employeeRequest);
+        if (existingEmployee != null) {
+            return updateExistingEmployee(employeeRequest, existingEmployee);
+        } else {
+            return createNewEmployee(employeeRequest);
+        }
+    }
+
+    private Employee findExistingEmployee(EmployeeRequest employeeRequest) {
+        boolean existsByPhone = employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber());
+        boolean existsByEmail = employeeRepository.existsByEmail(employeeRequest.email());
+
+        if (existsByPhone || existsByEmail) {
+            return employeeRepository.findAll().stream()
+                    .filter(emp -> emp.getPhoneNumber().equals(employeeRequest.phoneNumber()) ||
+                            emp.getEmail().equals(employeeRequest.email()))
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    private EmployeeResponse updateExistingEmployee(EmployeeRequest employeeRequest, Employee existingEmployee) {
+        if (!existingEmployee.getPhoneNumber().equals(employeeRequest.phoneNumber()) &&
+                employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber())) {
+            throw new ConflictException(
+                    "Phone number " + employeeRequest.phoneNumber() + " is already in use by another employee");
+        }
+        if (!existingEmployee.getEmail().equals(employeeRequest.email()) &&
+                employeeRepository.existsByEmail(employeeRequest.email())) {
+            throw new ConflictException(
+                    "Email " + employeeRequest.email() + " is already in use by another employee");
+        }
+
+        Employee employeeToUpdate = employeeMapper.partialUpdate(employeeRequest, existingEmployee);
+        Employee updatedEmployee = saveUpdates(employeeToUpdate);
+        return employeeMapper.toEmployeeResponse(updatedEmployee);
+    }
+
+    private EmployeeResponse createNewEmployee(EmployeeRequest employeeRequest) {
+        if (employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber())) {
+            throw new ConflictException(
+                    "Phone number " + employeeRequest.phoneNumber() + " is already in use");
+        }
+        if (employeeRepository.existsByEmail(employeeRequest.email())) {
+            throw new ConflictException(
+                    "Email " + employeeRequest.email() + " is already in use");
+        }
+
+        Employee newEmployee = employeeMapper.toEmployee(employeeRequest);
+        Employee savedEmployee = employeeRepository.save(newEmployee);
+        return employeeMapper.toEmployeeResponse(savedEmployee);
     }
 
     private Employee saveUpdates(Employee employee) {

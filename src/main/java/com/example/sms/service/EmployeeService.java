@@ -1,5 +1,6 @@
 package com.example.sms.service;
 
+import com.example.sms.dto.request.EmployeeRequest;
 import com.example.sms.dto.response.EmployeeResponse;
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface EmployeeService {
     EmployeeResponse addAssignmentToEmployee(Long employeeId, Long assignmentId);
 
     EmployeeResponse deleteAssignmentFromEmployee(Long employeeId, Long assignmentId);
+
+    List<EmployeeResponse> bulkUpsertEmployees(List<EmployeeRequest> employeeRequests);
 }

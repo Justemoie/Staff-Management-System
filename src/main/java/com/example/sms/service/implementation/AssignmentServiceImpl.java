@@ -54,7 +54,7 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse getById(Long id) {
-        if(cache.containsKey(id)) {
+        if (cache.containsKey(id)) {
             return cache.get(id);
         }
 
@@ -69,8 +69,9 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse create(AssignmentRequest assignmentRequest) {
-        if(assignmentRepository.existsByTitle(assignmentRequest.title())) {
-            throw new ConflictException("Title " + assignmentRequest.title() + " is already in use");
+        if (assignmentRepository.existsByTitle(assignmentRequest.title())) {
+            throw new ConflictException(
+                    "Title " + assignmentRequest.title() + " is already in use");
         }
         return assignmentMapper.toAssignmentResponse(
                 assignmentRepository.save(assignmentMapper.toAssignment(assignmentRequest)));
@@ -78,14 +79,16 @@ public class AssignmentServiceImpl implements
 
     @Override
     public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
-        if(assignmentRepository.existsByTitle(assignmentRequest.title())) {
-            throw new ConflictException("Title " + assignmentRequest.title() + " is already in use");
+        if (assignmentRepository.existsByTitle(assignmentRequest.title())) {
+            throw new ConflictException(
+                    "Title " + assignmentRequest.title() + " is already in use");
         }
         Assignment assignmentToUpdate = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Assignment not found with such id"));
 
-        Assignment assignment = assignmentMapper.partialUpdate(assignmentRequest, assignmentToUpdate);
+        Assignment assignment = assignmentMapper
+                .partialUpdate(assignmentRequest, assignmentToUpdate);
         Assignment updatedAssignment = saveUpdates(assignment);
 
         return assignmentMapper.toAssignmentResponse(updatedAssignment);
@@ -166,7 +169,7 @@ public class AssignmentServiceImpl implements
 
     private Assignment saveUpdates(Assignment assignment) {
         var assignmentToSave = assignmentRepository.save(assignment);
-        if(cache.containsKey(assignment.getId())) {
+        if (cache.containsKey(assignment.getId())) {
             cache.put(assignment.getId(), assignmentMapper.toAssignmentResponse(assignment));
         }
         return assignmentToSave;

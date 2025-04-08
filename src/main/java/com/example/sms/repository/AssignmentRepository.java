@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
-    Optional<Assignment> findById(long id);
+    Optional<Assignment> findById(Long id);
 
     Assignment save(Assignment assignment);
 
