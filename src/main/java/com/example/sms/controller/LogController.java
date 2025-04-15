@@ -81,9 +81,7 @@ public class LogController {
             (responseCode = "400", description = "File is still being processed"), @ApiResponse
             (responseCode = "404", description = "Log file not found")
     })
-    public ResponseEntity<?> getLogFileById(
-            @Parameter(description = "Log creation ID", required = true)
-            @PathVariable String id) {
+    public ResponseEntity<Object> getLogFileById(@PathVariable String id) {
         try {
             Resource resource = logService.getLogFileById(id);
             if (resource == null) {
