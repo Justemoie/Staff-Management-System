@@ -1,6 +1,8 @@
 package com.example.sms.exception;
 
 import com.example.sms.dto.response.ErrorResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +14,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -29,7 +29,8 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.NOT_FOUND.value()
         );
-        logger.error("Error [{}]: Resource not found - {}", HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        logger.error("Error [{}]: Resource not found - {}",
+                HttpStatus.NOT_FOUND.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -42,7 +43,8 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST.value()
         );
-        logger.error("Error [{}]: Invalid request - {}", HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        logger.error("Error [{}]: Invalid request - {}",
+                HttpStatus.BAD_REQUEST.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -55,7 +57,8 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.UNAUTHORIZED.value()
         );
-        logger.error("Error [{}]: Unauthorized access - {}", HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        logger.error("Error [{}]: Unauthorized access - {}",
+                HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
@@ -68,7 +71,8 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
-        logger.error("Error [{}]: Internal server error - {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), ex);
+        logger.error("Error [{}]: Internal server error - {}",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -81,7 +85,8 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.CONFLICT.value()
         );
-        logger.error("Error [{}]: Conflict error - {}", HttpStatus.CONFLICT.value(), ex.getMessage());
+        logger.error("Error [{}]: Conflict error - {}",
+                HttpStatus.CONFLICT.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
@@ -94,7 +99,22 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         // Добавляем код ошибки в лог
-        logger.error("Error [{}]: Validation failed for request: {}", HttpStatus.BAD_REQUEST.value(), errors);
+        logger.error("Error [{}]: Validation failed for request: {}",
+                HttpStatus.BAD_REQUEST.value(), errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Bad Request",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value()
+        );
+        logger.error("Error [{}]: File is still being processed - {}",
+                HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

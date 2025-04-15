@@ -1,10 +1,8 @@
 package com.example.sms.service.implementation;
 
+import com.example.sms.dto.response.LogCreationResponse;
+import com.example.sms.model.LogCreationStatus;
 import com.example.sms.service.LogService;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,17 +11,25 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PostConstruct;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LogServiceImpl implements LogService {
 
     private final Path logDir;
+    private final Map<String, LogCreationStatus> statusMap = new ConcurrentHashMap<>();
 
     public LogServiceImpl() {
         this.logDir = Paths.get("logs");
     }
 
-    // Конструктор для тестов
     public LogServiceImpl(Path logDir) {
         this.logDir = logDir;
     }
@@ -37,7 +43,8 @@ public class LogServiceImpl implements LogService {
 
             Path invalidDateFile = logDir.resolve("invalid-date.txt");
             if (!Files.exists(invalidDateFile)) {
-                Files.writeString(invalidDateFile, "Invalid date format. Please use yyyy-MM-dd (e.g., 2025-03-31).");
+                Files.writeString(invalidDateFile,
+                        "Invalid date format. Please use yyyy-MM-dd (e.g., 2025-03-31).");
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize invalid-date.txt", e);
@@ -45,10 +52,73 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
+    public LogCreationResponse createLogFileAsync() {
+        String id = UUID.randomUUID().toString();
+        LogCreationStatus status = new LogCreationStatus(id, "PENDING");
+        statusMap.put(id, status);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(8000);
+
+                LocalDate logDate = LocalDate.now();
+                String fileName = "app.log";
+                Path filePath = logDir.resolve(fileName);
+
+                if (!Files.exists(filePath)) {
+                    Files.createFile(filePath);
+                }
+
+                Files.writeString(filePath,
+                        "Лог для текущей даты: "
+                                + logDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+                status.setStatus("COMPLETED");
+                status.setFilePath(filePath.toString());
+            } catch (IOException e) {
+                status.setStatus("FAILED");
+                throw new RuntimeException("Не удалось создать лог-файл", e);
+            } catch (InterruptedException e) {
+                status.setStatus("FAILED");
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Операция была прервана во время задержки", e);
+            }
+        });
+
+        return new LogCreationResponse(id, "PENDING");
+    }
+
+    @Override
+    public LogCreationStatus getLogCreationStatus(String id) {
+        return statusMap.getOrDefault(id, new LogCreationStatus(id, "NOT_FOUND"));
+    }
+
+    @Override
+    public Resource getLogFileById(String id) {
+        LogCreationStatus status = statusMap.get(id);
+        if (status == null || status.getFilePath() == null) {
+            return null;
+        }
+        if ("PENDING".equals(status.getStatus())) {
+            throw new IllegalStateException("Файл ещё обрабатывается, попробуйте позже");
+        }
+        if (!"COMPLETED".equals(status.getStatus())) {
+            return null;
+        }
+        File file = new File(status.getFilePath());
+        return file.exists() ? new FileSystemResource(file) : null;
+    }
+
+    @Override
     public Resource getLogFileResource(String date) throws DateTimeParseException {
         LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-        File logFile;
 
+        // Запрещаем будущие даты
+        if (logDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Нельзя запрашивать логи для будущих дат");
+        }
+
+        File logFile;
         if (logDate.equals(LocalDate.now())) {
             logFile = logDir.resolve("app.log").toFile();
         } else {
@@ -56,11 +126,7 @@ public class LogServiceImpl implements LogService {
             logFile = logDir.resolve(logFileName).toFile();
         }
 
-        if (!logFile.exists()) {
-            return null;
-        }
-
-        return new FileSystemResource(logFile);
+        return logFile.exists() ? new FileSystemResource(logFile) : null;
     }
 
     @Override

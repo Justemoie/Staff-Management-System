@@ -11,7 +11,8 @@ public record AssignmentRequest(
         String title,
 
         @NotBlank(message = "Description must not be blank")
-        @Size(min = 50, max = 250, message = "Description length must be between 50 and 100 characters")
+        @Size(min = 50, max = 250, message =
+                "Description length must be between 50 and 100 characters")
         String description
 ) {
 

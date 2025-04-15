@@ -1,11 +1,11 @@
 package com.example.sms.utils.cache;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class Cache<K, V> {
@@ -42,16 +42,16 @@ public class Cache<K, V> {
     }
 
     public void put(K key, V value) {
-        if(cache.containsKey(key)) {
+        if (cache.containsKey(key)) {
             CacheEntry<V> entry = cache.get(key);
             entry.value = value;
             entry.frequency++;
         } else {
-            if(cache.size() >= capacity) {
-                K LFUKey = findKey();
-                if (LFUKey != null) {
-                    cache.remove(LFUKey);
-                    logger.info("Cache evicted least frequently used key: {}", LFUKey);
+            if (cache.size() >= capacity) {
+                K lfuKey = findKey();
+                if (lfuKey != null) {
+                    cache.remove(lfuKey);
+                    logger.info("Cache evicted least frequently used key: {}", lfuKey);
                 }
             }
             cache.put(key, new CacheEntry<>(value));
@@ -74,8 +74,8 @@ public class Cache<K, V> {
         K key = null;
         int minFrequency = Integer.MAX_VALUE;;
 
-        for(Map.Entry<K, CacheEntry<V>> entry : cache.entrySet()) {
-            if(entry.getValue().frequency < minFrequency) {
+        for (Map.Entry<K, CacheEntry<V>> entry : cache.entrySet()) {
+            if (entry.getValue().frequency < minFrequency) {
                 minFrequency = entry.getValue().frequency;
                 key = entry.getKey();
             }
@@ -85,7 +85,7 @@ public class Cache<K, V> {
     }
 
     public void remove(K key) {
-        if(cache.containsKey(key)) {
+        if (cache.containsKey(key)) {
             cache.remove(key);
             logger.info("Key: {} removed from cache", key);
         } else {

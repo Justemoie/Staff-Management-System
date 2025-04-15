@@ -8,10 +8,5 @@ public record AssignmentResponse(
         String description,
         List<FeedBackResponse> feedBacks
 ) {
-    public AssignmentResponse {
-        if (id == null) id = 0L;
-        if (title == null) title = "";
-        if (description == null) description = "";
-        if (feedBacks == null) feedBacks = List.of();
-    }
+    
 }
