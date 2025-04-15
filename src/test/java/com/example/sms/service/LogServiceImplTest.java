@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -66,15 +65,6 @@ class LogServiceImplTest {
     }
 
     @Test
-    void init_WhenIOExceptionOccurs_ShouldThrowRuntimeException() {
-        // Для этого теста нужно замокать Files, чтобы выбросить IOException
-        // Это сложно сделать без PowerMock, поэтому мы можем проверить нормальное поведение
-        // или переписать LogServiceImpl для инъекции зависимостей
-        // Пропустим этот тест, так как он требует сложного мока
-    }
-
-    // Тесты для метода getLogFileResource
-    @Test
     void getLogFileResource_WhenCurrentDateAndLogExists_ShouldReturnResource() throws IOException {
         // Arrange
         String date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -107,7 +97,6 @@ class LogServiceImplTest {
     void getLogFileResource_WhenPastDateAndLogExists_ShouldReturnResource() throws IOException {
         // Arrange
         String date = "2025-03-31";
-        LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
         String logFileName = "app." + date + ".log";
         File logFile = logsDir.resolve(logFileName).toFile();
         Files.createDirectories(logsDir);

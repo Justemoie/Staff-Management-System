@@ -72,7 +72,7 @@ public class Cache<K, V> {
 
     public K findKey() {
         K key = null;
-        int minFrequency = Integer.MAX_VALUE;;
+        int minFrequency = Integer.MAX_VALUE;
 
         for (Map.Entry<K, CacheEntry<V>> entry : cacheEntryMap.entrySet()) {
             if (entry.getValue().frequency < minFrequency) {
