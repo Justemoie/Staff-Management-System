@@ -62,6 +62,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(LogCreationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleLogCreationException(
+            LogCreationException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Log creation error",
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        logger.error("Error [{}]: Log creation failed - {}",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), ex);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleGlobalException(
@@ -98,7 +112,7 @@ public class GlobalExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        // Добавляем код ошибки в лог
+        // Adding the error code to the log
         logger.error("Error [{}]: Validation failed for request: {}",
                 HttpStatus.BAD_REQUEST.value(), errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);

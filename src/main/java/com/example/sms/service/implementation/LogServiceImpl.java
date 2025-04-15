@@ -3,6 +3,7 @@ package com.example.sms.service.implementation;
 import com.example.sms.dto.response.LogCreationResponse;
 import com.example.sms.model.LogCreationStatus;
 import com.example.sms.service.LogService;
+import com.example.sms.exception.LogCreationException;  // Importing the custom exception
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -30,8 +33,14 @@ public class LogServiceImpl implements LogService {
         this.logDir = Paths.get("logs");
     }
 
+    @Autowired
     public LogServiceImpl(Path logDir) {
         this.logDir = logDir;
+    }
+
+    @Bean
+    public Path logDir() {
+        return Paths.get("logs");
     }
 
     @PostConstruct
@@ -47,7 +56,7 @@ public class LogServiceImpl implements LogService {
                         "Invalid date format. Please use yyyy-MM-dd (e.g., 2025-03-31).");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize invalid-date.txt", e);
+            throw new LogCreationException("Failed to initialize invalid-date.txt", e);  // Use custom exception here
         }
     }
 
@@ -77,11 +86,11 @@ public class LogServiceImpl implements LogService {
                 status.setFilePath(filePath.toString());
             } catch (IOException e) {
                 status.setStatus("FAILED");
-                throw new RuntimeException("Не удалось создать лог-файл", e);
+                throw new LogCreationException("Не удалось создать лог-файл", e);  // Use custom exception here
             } catch (InterruptedException e) {
                 status.setStatus("FAILED");
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Операция была прервана во время задержки", e);
+                throw new LogCreationException("Операция была прервана во время задержки", e);  // Use custom exception here
             }
         });
 
@@ -100,7 +109,7 @@ public class LogServiceImpl implements LogService {
             return null;
         }
         if ("PENDING".equals(status.getStatus())) {
-            throw new IllegalStateException("Файл ещё обрабатывается, попробуйте позже");
+            throw new LogCreationException("Файл ещё обрабатывается, попробуйте позже");  // Use custom exception here
         }
         if (!"COMPLETED".equals(status.getStatus())) {
             return null;
@@ -113,9 +122,8 @@ public class LogServiceImpl implements LogService {
     public Resource getLogFileResource(String date) throws DateTimeParseException {
         LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
 
-        // Запрещаем будущие даты
         if (logDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Нельзя запрашивать логи для будущих дат");
+            throw new LogCreationException("Нельзя запрашивать логи для будущих дат");
         }
 
         File logFile;

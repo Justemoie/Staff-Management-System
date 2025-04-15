@@ -13,7 +13,6 @@ import com.example.sms.service.GenericService;
 import com.example.sms.utils.cache.Cache;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -86,9 +85,7 @@ public class EmployeeServiceImpl implements
         Employee employee = employeeMapper.partialUpdate(employeeRequest, employeeToUpdate);
         Employee updatedEmployee = saveUpdates(employee);
 
-        var employeeResponse = employeeMapper.toEmployeeResponse(updatedEmployee);
-
-        return employeeResponse;
+        return employeeMapper.toEmployeeResponse(updatedEmployee);
     }
 
     @Override
@@ -191,7 +188,7 @@ public class EmployeeServiceImpl implements
     public List<EmployeeResponse> bulkUpsertEmployees(List<EmployeeRequest> employeeRequests) {
         return employeeRequests.stream()
                 .map(this::processEmployeeRequest)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private EmployeeResponse processEmployeeRequest(EmployeeRequest employeeRequest) {
