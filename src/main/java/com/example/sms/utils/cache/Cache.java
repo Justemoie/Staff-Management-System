@@ -13,7 +13,7 @@ public class Cache<K, V> {
     private static final Logger logger = LoggerFactory.getLogger(Cache.class);
 
     @Getter
-    private Map<K, CacheEntry<V>> cache;
+    private Map<K, CacheEntry<V>> cacheEntryMap;
 
     @Getter
     private int capacity;
@@ -29,7 +29,7 @@ public class Cache<K, V> {
     }
 
     public V get(K key) {
-        CacheEntry<V> entry = cache.get(key);
+        CacheEntry<V> entry = cacheEntryMap.get(key);
         if (entry != null) {
             logger.info("Cache hit for key: {}", key);
             logger.info("frequency {}", entry.frequency);
@@ -42,30 +42,30 @@ public class Cache<K, V> {
     }
 
     public void put(K key, V value) {
-        if (cache.containsKey(key)) {
-            CacheEntry<V> entry = cache.get(key);
+        if (cacheEntryMap.containsKey(key)) {
+            CacheEntry<V> entry = cacheEntryMap.get(key);
             entry.value = value;
             entry.frequency++;
         } else {
-            if (cache.size() >= capacity) {
+            if (cacheEntryMap.size() >= capacity) {
                 K lfuKey = findKey();
                 if (lfuKey != null) {
-                    cache.remove(lfuKey);
+                    cacheEntryMap.remove(lfuKey);
                     logger.info("Cache evicted least frequently used key: {}", lfuKey);
                 }
             }
-            cache.put(key, new CacheEntry<>(value));
+            cacheEntryMap.put(key, new CacheEntry<>(value));
             logger.info("Key: {} added/updated in cache with value: {}", key, value);
         }
     }
 
     public void clearCache() {
-        cache.clear();
+        cacheEntryMap.clear();
         logger.info("Cache cleared");
     }
 
     public boolean containsKey(K key) {
-        boolean exists = cache.containsKey(key);
+        boolean exists = cacheEntryMap.containsKey(key);
         logger.info("Key: {} exists in cache: {}", key, exists);
         return exists;
     }
@@ -74,7 +74,7 @@ public class Cache<K, V> {
         K key = null;
         int minFrequency = Integer.MAX_VALUE;;
 
-        for (Map.Entry<K, CacheEntry<V>> entry : cache.entrySet()) {
+        for (Map.Entry<K, CacheEntry<V>> entry : cacheEntryMap.entrySet()) {
             if (entry.getValue().frequency < minFrequency) {
                 minFrequency = entry.getValue().frequency;
                 key = entry.getKey();
@@ -85,8 +85,8 @@ public class Cache<K, V> {
     }
 
     public void remove(K key) {
-        if (cache.containsKey(key)) {
-            cache.remove(key);
+        if (cacheEntryMap.containsKey(key)) {
+            cacheEntryMap.remove(key);
             logger.info("Key: {} removed from cache", key);
         } else {
             logger.info("Key: {} not found in cache", key);
@@ -95,7 +95,7 @@ public class Cache<K, V> {
 
     public Cache() {
         this.capacity = 3;
-        this.cache = new HashMap<>();
+        this.cacheEntryMap = new HashMap<>();
         logger.info("Cache initialized with capacity {}", capacity);
     }
 }

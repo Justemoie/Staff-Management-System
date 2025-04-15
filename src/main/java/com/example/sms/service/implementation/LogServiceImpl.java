@@ -63,7 +63,7 @@ public class LogServiceImpl implements LogService {
     @Override
     public LogCreationResponse createLogFileAsync() {
         String id = UUID.randomUUID().toString();
-        LogCreationStatus status = new LogCreationStatus(id, "PENDING");
+        LogCreationStatus status = new LogCreationStatus(id, "PENDING ");
         statusMap.put(id, status);
 
         CompletableFuture.runAsync(() -> {
