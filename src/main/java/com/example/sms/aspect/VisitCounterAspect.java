@@ -31,9 +31,6 @@ public class VisitCounterAspect {
             HttpServletRequest request = attributes.getRequest();
             String url = request.getRequestURI();
             visitCounterService.incrementVisit(url);
-        } else {
-            // Логируем, если контекст запроса недоступен
-            System.out.println("Request attributes are null, cannot increment visit count");
         }
     }
 }
