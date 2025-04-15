@@ -18,25 +18,29 @@ public class LoggingAspect {
 
     @Before("execution(* com.example.sms.controller.*.*(..))")
     public void logBefore(JoinPoint joinPoint) {
-        logger.info("Executing method: {} with arguments: {}",
-                joinPoint.getSignature().getName(),
-                Arrays.toString(joinPoint.getArgs()));
+        if (logger.isInfoEnabled()) {
+            logger.info("Executing method: {} with arguments: {}",
+                    joinPoint.getSignature().getName(),
+                    Arrays.toString(joinPoint.getArgs()));
+        }
     }
 
-    @AfterReturning(pointcut =
-            "execution(* com.example.sms.controller.*.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.example.sms.controller.*.*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
-        logger.info("Method {} completed successfully with result: {}",
-                joinPoint.getSignature().getName(),
-                result);
+        if (logger.isInfoEnabled()) {
+            logger.info("Method {} completed successfully with result: {}",
+                    joinPoint.getSignature().getName(),
+                    result);
+        }
     }
 
-    @AfterThrowing(pointcut =
-            "execution(* com.example.sms.controller.*.*(..))", throwing = "exception")
+    @AfterThrowing(pointcut = "execution(* com.example.sms.controller.*.*(..))", throwing = "exception")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable exception) {
-        logger.error("Exception in method {}: {}",
-                joinPoint.getSignature().getName(),
-                exception.getMessage(),
-                exception);
+        if (logger.isErrorEnabled()) {
+            logger.error("Exception in method {}: {}",
+                    joinPoint.getSignature().getName(),
+                    exception.getMessage(),
+                    exception);
+        }
     }
 }
