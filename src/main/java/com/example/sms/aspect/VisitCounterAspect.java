@@ -26,7 +26,8 @@ public class VisitCounterAspect {
            + "@annotation(org.springframework.web.bind.annotation.PostMapping) || "
             + "@annotation(org.springframework.web.bind.annotation.RequestMapping))")
     public void incrementVisitCount(JoinPoint joinPoint) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes attributes =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
             String url = request.getRequestURI();

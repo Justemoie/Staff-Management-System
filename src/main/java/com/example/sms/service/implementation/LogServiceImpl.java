@@ -1,9 +1,9 @@
 package com.example.sms.service.implementation;
 
 import com.example.sms.dto.response.LogCreationResponse;
+import com.example.sms.exception.LogCreationException;
 import com.example.sms.model.LogCreationStatus;
 import com.example.sms.service.LogService;
-import com.example.sms.exception.LogCreationException;  // Importing the custom exception
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,7 +56,8 @@ public class LogServiceImpl implements LogService {
                         "Invalid date format. Please use yyyy-MM-dd (e.g., 2025-03-31).");
             }
         } catch (IOException e) {
-            throw new LogCreationException("Failed to initialize invalid-date.txt", e);  // Use custom exception here
+            throw new LogCreationException(
+                    "Failed to initialize invalid-date.txt", e);  // Use custom exception here
         }
     }
 
@@ -86,11 +87,11 @@ public class LogServiceImpl implements LogService {
                 status.setFilePath(filePath.toString());
             } catch (IOException e) {
                 status.setStatus("FAILED");
-                throw new LogCreationException("Не удалось создать лог-файл", e);  // Use custom exception here
+                throw new LogCreationException("Не удалось создать лог-файл", e);
             } catch (InterruptedException e) {
                 status.setStatus("FAILED");
                 Thread.currentThread().interrupt();
-                throw new LogCreationException("Операция была прервана во время задержки", e);  // Use custom exception here
+                throw new LogCreationException("Операция была прервана во время задержки", e);
             }
         });
 
@@ -109,7 +110,8 @@ public class LogServiceImpl implements LogService {
             return null;
         }
         if ("PENDING".equals(status.getStatus())) {
-            throw new LogCreationException("Файл ещё обрабатывается, попробуйте позже");  // Use custom exception here
+            throw new LogCreationException(
+                    "Файл ещё обрабатывается, попробуйте позже");
         }
         if (!"COMPLETED".equals(status.getStatus())) {
             return null;

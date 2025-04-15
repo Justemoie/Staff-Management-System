@@ -25,7 +25,8 @@ public class LoggingAspect {
         }
     }
 
-    @AfterReturning(pointcut = "execution(* com.example.sms.controller.*.*(..))", returning = "result")
+    @AfterReturning(pointcut =
+            "execution(* com.example.sms.controller.*.*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
         if (logger.isInfoEnabled()) {
             logger.info("Method {} completed successfully with result: {}",
@@ -34,7 +35,8 @@ public class LoggingAspect {
         }
     }
 
-    @AfterThrowing(pointcut = "execution(* com.example.sms.controller.*.*(..))", throwing = "exception")
+    @AfterThrowing(pointcut =
+            "execution(* com.example.sms.controller.*.*(..))", throwing = "exception")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable exception) {
         if (logger.isErrorEnabled()) {
             logger.error("Exception in method {}: {}",
