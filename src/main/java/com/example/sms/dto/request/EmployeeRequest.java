@@ -16,7 +16,7 @@ public record EmployeeRequest(
 
         @NotBlank(message = "Phone number must not be empty")
         @Pattern(
-                regexp = "^\\+375[0-9]{2}[0-9]{7}$",
+                regexp = "^\\+375\\d{2}\\d{7}$",
                 message = "Phone number must be in the format +375xx1111111, e.g., +375291234567"
         )
         String phoneNumber,
