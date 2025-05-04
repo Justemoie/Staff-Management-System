@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConflictException(
             Exception ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
-                "Conflict error",
+                "Conflict error, check out your fields",
                 ex.getMessage(),
                 HttpStatus.CONFLICT.value()
         );

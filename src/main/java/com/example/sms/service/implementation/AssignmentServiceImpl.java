@@ -14,10 +14,7 @@ import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.repository.FeedBackRepository;
 import com.example.sms.service.AssignmentService;
-import com.example.sms.service.GenericService;
 import com.example.sms.utils.cache.Cache;
-
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,11 +31,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final Cache<Long, AssignmentResponse> cache;
 
     public AssignmentServiceImpl(Cache<Long, AssignmentResponse> cache,
-            AssignmentRepository assignmentRepository,
-            AssignmentMapper assignmentMapper,
-            EmployeeRepository employeeRepository,
-            FeedBackMapper feedBackMapper,
-            FeedBackRepository feedBackRepository) {
+                                 AssignmentRepository assignmentRepository,
+                                 AssignmentMapper assignmentMapper,
+                                 EmployeeRepository employeeRepository,
+                                 FeedBackMapper feedBackMapper,
+                                 FeedBackRepository feedBackRepository) {
 
         this.cache = cache;
         this.assignmentRepository = assignmentRepository;
@@ -60,7 +57,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         Assignment assignmentEntity = assignmentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Assignment not found with id = " + id));
+                        HttpStatus.NOT_FOUND, "Assignment not found with id  = " + id));
 
         AssignmentResponse assignment = assignmentMapper.toAssignmentResponse(assignmentEntity);
         cache.put(id, assignment);
@@ -79,16 +76,18 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentResponse update(Long id, AssignmentRequest assignmentRequest) {
-        if (assignmentRepository.existsByTitle(assignmentRequest.title())) {
+        Assignment currentAssignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Assignment not found with such id"));
+
+        if (!currentAssignment.getTitle().equals(assignmentRequest.title())
+                && assignmentRepository.existsByTitle(assignmentRequest.title())) {
             throw new ConflictException(
                     "Title " + assignmentRequest.title() + " is already in use");
         }
-        Assignment assignmentToUpdate = assignmentRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Assignment not found with such id"));
 
-        Assignment assignment = assignmentMapper
-                .partialUpdate(assignmentRequest, assignmentToUpdate);
+        Assignment assignment = assignmentMapper.partialUpdate(
+                assignmentRequest, currentAssignment);
         Assignment updatedAssignment = saveUpdates(assignment);
 
         return assignmentMapper.toAssignmentResponse(updatedAssignment);
