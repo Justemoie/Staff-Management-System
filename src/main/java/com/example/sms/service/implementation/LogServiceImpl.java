@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -31,11 +30,6 @@ public class LogServiceImpl implements LogService {
 
     public LogServiceImpl() {
         this.logDir = Paths.get("logs");
-    }
-
-    @Autowired
-    public LogServiceImpl(Path logDir) {
-        this.logDir = logDir;
     }
 
     @Bean

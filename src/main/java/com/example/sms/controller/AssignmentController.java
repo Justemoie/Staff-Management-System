@@ -6,7 +6,6 @@ import com.example.sms.dto.response.AssignmentResponse;
 import com.example.sms.dto.response.FeedBackResponse;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.service.AssignmentService;
-import com.example.sms.service.GenericService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

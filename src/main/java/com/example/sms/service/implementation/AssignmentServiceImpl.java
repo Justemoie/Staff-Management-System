@@ -16,6 +16,8 @@ import com.example.sms.repository.FeedBackRepository;
 import com.example.sms.service.AssignmentService;
 import com.example.sms.service.GenericService;
 import com.example.sms.utils.cache.Cache;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -51,18 +53,17 @@ public class AssignmentServiceImpl implements AssignmentService {
         return assignmentMapper.toAssignmentResponseList(assignmentRepository.findAll());
     }
 
-    @Override
     public AssignmentResponse getById(Long id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
 
-        var assignment = assignmentMapper.toAssignmentResponse(assignmentRepository.findById(id)
+        Assignment assignmentEntity = assignmentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Assignment not found")));
+                        HttpStatus.NOT_FOUND, "Assignment not found with id = " + id));
 
+        AssignmentResponse assignment = assignmentMapper.toAssignmentResponse(assignmentEntity);
         cache.put(id, assignment);
-
         return assignment;
     }
 

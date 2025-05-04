@@ -9,7 +9,6 @@ import com.example.sms.mapper.EmployeeMapper;
 import com.example.sms.repository.AssignmentRepository;
 import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.service.EmployeeService;
-import com.example.sms.service.GenericService;
 import com.example.sms.utils.cache.Cache;
 
 import java.util.Collections;
@@ -23,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -33,9 +31,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final AssignmentRepository assignmentRepository;
 
     public EmployeeServiceImpl(Cache<Long, EmployeeResponse> cache,
-            EmployeeRepository employeesRepository,
-            EmployeeMapper employeeMapper,
-            AssignmentRepository assignmentRepository) {
+                               EmployeeRepository employeesRepository,
+                               EmployeeMapper employeeMapper,
+                               AssignmentRepository assignmentRepository) {
 
         this.cache = cache;
         this.employeeRepository = employeesRepository;
@@ -121,6 +119,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeResponse> searchEmployeesByAssignmentId(Long id) {
+        if (!assignmentRepository.existsById(id)) {
+            return Collections.emptyList();
+        }
+
         var employees = employeeMapper.toEmployeeResponseList(
                 employeeRepository.findEmployeesByAssignmentId(id));
 
@@ -157,8 +159,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private List<EmployeeResponse> getEmployeeResponses(List<EmployeeResponse> employees) {
-        if (employees.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nothing found");
+        if (employees == null || employees.isEmpty()) {
+            return Collections.emptyList();
         }
 
         List<EmployeeResponse> cachedEmployees = employees.stream()
@@ -171,8 +173,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         employees.forEach(employee -> cache.put(employee.id(), employee));
-
-
         return employees;
     }
 
@@ -315,7 +315,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Произошла ошибка при поиске сотрудников: " + e.getMessage());
         }
     }

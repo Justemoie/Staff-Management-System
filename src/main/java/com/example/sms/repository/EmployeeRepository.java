@@ -12,28 +12,23 @@ import org.springframework.stereotype.Repository;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query(value = "SELECT e FROM Employee e "
-            + "WHERE (:firstName IS NULL OR e.firstName = :firstName) "
-            + "AND (:lastName IS NULL OR e.lastName = :lastName)")
+            + "WHERE (:firstName IS NULL OR UPPER(e.firstName) LIKE UPPER(CONCAT('%', :firstName, '%'))) "
+            + "AND (:lastName IS NULL OR UPPER(e.lastName) LIKE UPPER(CONCAT('%', :lastName, '%')))")
     List<Employee> findByFirstNameAndLastName(
             @Param("firstName") String firstName,
             @Param("lastName") String lastName);
 
     @Query(value = "SELECT e FROM Employee e "
-            + "WHERE (:first_name IS NULL OR e.firstName = :first_name)")
-    List<Employee> findByFirstName(@Param("first_name") String firstName);
+            + "WHERE (:firstName IS NULL OR UPPER(e.firstName) LIKE UPPER(CONCAT('%', :firstName, '%')))")
+    List<Employee> findByFirstName(@Param("firstName") String firstName);
 
-    @Query(value = "SELECT * FROM employees "
-            + "WHERE (:last_name IS NULL OR last_name = :last_name)",
-            nativeQuery = true)
-    List<Employee> findByLastName(
-            @Param("last_name") String lastName);
+    @Query(value = "SELECT e FROM Employee e "
+            + "WHERE (:lastName IS NULL OR UPPER(e.lastName) LIKE UPPER(CONCAT('%', :lastName, '%')))")
+    List<Employee> findByLastName(@Param("lastName") String lastName);
 
-
-    @Query(value = "SELECT e.* FROM employees e "
-            + "LEFT JOIN employee_assignments ea ON e.id = ea.employee_id "
-            + "LEFT JOIN assignments a ON ea.assignment_id = a.id "
-            + "WHERE (:assignmentId IS NULL OR a.id = :assignmentId)",
-            nativeQuery = true)
+    @Query(value = "SELECT e FROM Employee e "
+            + "JOIN e.assignments a "
+            + "WHERE (:assignmentId IS NULL OR a.id = :assignmentId)")
     List<Employee> findEmployeesByAssignmentId(@Param("assignmentId") Long assignmentId);
 
     Optional<Employee> findById(Long id);
@@ -41,7 +36,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Employee save(Employee employee);
 
     boolean existsByPhoneNumber(String phoneNumber);
-    
+
     boolean existsByEmail(String email);
 }
-

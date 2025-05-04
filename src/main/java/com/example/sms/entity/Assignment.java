@@ -77,6 +77,6 @@ public class Assignment {
     }
 
     public void setFeedBacks(List<FeedBack> feedBacks) {
-        this.feedBacks = feedBacks;
+        this.feedBacks = feedBacks != null ? feedBacks : new ArrayList<>();
     }
 }
