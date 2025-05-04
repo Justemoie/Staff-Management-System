@@ -3,7 +3,6 @@ package com.example.sms.controller;
 import com.example.sms.dto.request.EmployeeRequest;
 import com.example.sms.dto.response.EmployeeResponse;
 import com.example.sms.service.EmployeeService;
-import com.example.sms.service.GenericService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,32 +24,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-    private final GenericService<EmployeeResponse, EmployeeRequest, Long> genericService;
 
     public EmployeeController(
-            EmployeeService employeeService,
-            GenericService<EmployeeResponse, EmployeeRequest, Long> genericService) {
+            EmployeeService employeeService) {
         this.employeeService = employeeService;
-        this.genericService = genericService;
     }
 
     @GetMapping("/all")
     @Operation(summary = "Get all employees")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
-        return ResponseEntity.ok(genericService.getAll());
+        return ResponseEntity.ok(employeeService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get employee by ID")
     public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id) {
-        return ResponseEntity.ok(genericService.getById(id));
+        return ResponseEntity.ok(employeeService.getById(id));
     }
 
     @PostMapping("/create")
     @Operation(summary = "Create an employee")
     public ResponseEntity<EmployeeResponse> createEmployee(
             @Valid @RequestBody EmployeeRequest employeeRequest) {
-        return ResponseEntity.ok(genericService.create(employeeRequest));
+        return ResponseEntity.ok(employeeService.create(employeeRequest));
     }
 
     @PostMapping("/bulk")
@@ -66,27 +62,21 @@ public class EmployeeController {
     public ResponseEntity<EmployeeResponse> updateEmployee(
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest employeeRequest) {
-        return ResponseEntity.ok(genericService.update(id, employeeRequest));
+        return ResponseEntity.ok(employeeService.update(id, employeeRequest));
     }
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete an employee")
     public void deleteEmployee(@PathVariable Long id) {
-        genericService.delete(id);
+        employeeService.delete(id);
     }
 
-    @GetMapping("/search-by-first-name")
-    @Operation(summary = "Search by first name")
-    public ResponseEntity<List<EmployeeResponse>> searchByFirstName(
-            @RequestParam String firstName) {
-        return ResponseEntity.ok(employeeService.searchEmployeesByFirstName(firstName));
-    }
-
-    @GetMapping("/search-by-last-name")
-    @Operation(summary = "Search by last name")
+    @GetMapping("/employees/search")
     public ResponseEntity<List<EmployeeResponse>> searchEmployees(
-            @RequestParam(name = "lastName", required = false) String lastName) {
-        return ResponseEntity.ok(employeeService.searchEmployeesByLastName(lastName));
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName) {
+        List<EmployeeResponse> employees = employeeService.searchByInitials(firstName, lastName);
+        return ResponseEntity.ok(employees);
     }
 
     @PostMapping("/{employeeId}/add-assignment/{assignmentId}")

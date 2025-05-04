@@ -12,6 +12,13 @@ import org.springframework.stereotype.Repository;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query(value = "SELECT e FROM Employee e "
+            + "WHERE (:firstName IS NULL OR e.firstName = :firstName) "
+            + "AND (:lastName IS NULL OR e.lastName = :lastName)")
+    List<Employee> findByFirstNameAndLastName(
+            @Param("firstName") String firstName,
+            @Param("lastName") String lastName);
+
+    @Query(value = "SELECT e FROM Employee e "
             + "WHERE (:first_name IS NULL OR e.firstName = :first_name)")
     List<Employee> findByFirstName(@Param("first_name") String firstName);
 

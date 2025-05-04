@@ -22,8 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class AssignmentServiceImpl implements
-        GenericService<AssignmentResponse, AssignmentRequest, Long>, AssignmentService {
+public class AssignmentServiceImpl implements AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
     private final AssignmentMapper assignmentMapper;

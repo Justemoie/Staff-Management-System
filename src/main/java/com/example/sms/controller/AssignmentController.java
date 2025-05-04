@@ -28,35 +28,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
-    private final GenericService<AssignmentResponse, AssignmentRequest, Long> genericService;
     private final AssignmentRepository assignmentRepository;
 
     public AssignmentController(
             AssignmentService assignmentService,
-            GenericService<AssignmentResponse, AssignmentRequest, Long> genericService,
             AssignmentRepository assignmentRepository) {
         this.assignmentService = assignmentService;
-        this.genericService = genericService;
         this.assignmentRepository = assignmentRepository;
     }
 
     @GetMapping("/all")
     @Operation(summary = "Get all assignments")
     public ResponseEntity<List<AssignmentResponse>> getAllAssignments() {
-        return ResponseEntity.ok(genericService.getAll());
+        return ResponseEntity.ok(assignmentService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get assignment by ID")
     public ResponseEntity<AssignmentResponse> getAssignmentById(@PathVariable Long id) {
-        return ResponseEntity.ok(genericService.getById(id));
+        return ResponseEntity.ok(assignmentService.getById(id));
     }
 
     @PostMapping("/create")
     @Operation(summary = "Create an assignment")
     public ResponseEntity<AssignmentResponse> createAssignment(
             @Valid @RequestBody AssignmentRequest assignmentRequest) {
-        return ResponseEntity.ok(genericService.create(assignmentRequest));
+        return ResponseEntity.ok(assignmentService.create(assignmentRequest));
     }
 
     @PutMapping("/update/{id}")
@@ -64,13 +61,13 @@ public class AssignmentController {
     public ResponseEntity<AssignmentResponse> updateAssignment(
             @PathVariable Long id,
             @Valid @RequestBody AssignmentRequest assignmentRequest) {
-        return ResponseEntity.ok(genericService.update(id, assignmentRequest));
+        return ResponseEntity.ok(assignmentService.update(id, assignmentRequest));
     }
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete an assignment")
     public void deleteAssignment(@PathVariable Long id) {
-        genericService.delete(id);
+        assignmentService.delete(id);
     }
 
     @PostMapping("/{id}/addFeedBack")

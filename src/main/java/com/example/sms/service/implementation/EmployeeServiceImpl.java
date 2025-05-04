@@ -11,16 +11,21 @@ import com.example.sms.repository.EmployeeRepository;
 import com.example.sms.service.EmployeeService;
 import com.example.sms.service.GenericService;
 import com.example.sms.utils.cache.Cache;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
-public class EmployeeServiceImpl implements
-        GenericService<EmployeeResponse, EmployeeRequest, Long>, EmployeeService {
+public class EmployeeServiceImpl implements EmployeeService {
 
     private final Cache<Long, EmployeeResponse> cache;
     private final EmployeeRepository employeeRepository;
@@ -71,20 +76,28 @@ public class EmployeeServiceImpl implements
 
     @Override
     public EmployeeResponse update(Long id, EmployeeRequest employeeRequest) {
-        if (employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber())) {
-            throw new ConflictException("Phone number "
-                    + employeeRequest.phoneNumber() + " is already in use");
-        }  else if (employeeRepository.existsByEmail(employeeRequest.email())) {
-            throw new ConflictException("Email " + employeeRequest.email() + " is already in use");
-        }
-
-        Employee employeeToUpdate = employeeRepository.findById(id)
+        // Получаем текущего сотрудника
+        Employee targetEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Employee not found with id = " + id));
 
-        Employee employee = employeeMapper.partialUpdate(employeeRequest, employeeToUpdate);
-        Employee updatedEmployee = saveUpdates(employee);
+        // Проверяем уникальность phoneNumber, исключая текущего сотрудника
+        if (employeeRepository.existsByPhoneNumber(employeeRequest.phoneNumber()) &&
+                !targetEmployee.getPhoneNumber().equals(employeeRequest.phoneNumber())) {
+            throw new ConflictException("Phone number " + employeeRequest.phoneNumber() + " is already in use");
+        }
 
+        // Проверяем уникальность email, исключая текущего сотрудника
+        if (employeeRepository.existsByEmail(employeeRequest.email()) &&
+                !targetEmployee.getEmail().equals(employeeRequest.email())) {
+            throw new ConflictException("Email " + employeeRequest.email() + " is already in use");
+        }
+
+        // Обновляем сотрудника
+        Employee employeeToUpdate = employeeMapper.partialUpdate(employeeRequest, targetEmployee);
+        Employee updatedEmployee = saveUpdates(employeeToUpdate);
+
+        // Преобразуем в DTO и возвращаем
         return employeeMapper.toEmployeeResponse(updatedEmployee);
     }
 
@@ -188,7 +201,7 @@ public class EmployeeServiceImpl implements
     public List<EmployeeResponse> bulkUpsertEmployees(List<EmployeeRequest> employeeRequests) {
         return employeeRequests.stream()
                 .map(this::processEmployeeRequest)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private EmployeeResponse processEmployeeRequest(EmployeeRequest employeeRequest) {
@@ -255,5 +268,55 @@ public class EmployeeServiceImpl implements
             cache.put(employee.getId(), employeeMapper.toEmployeeResponse(employee));
         }
         return employeeRepository.save(employee);
+    }
+
+    @Override
+    public List<EmployeeResponse> searchByInitials(String firstName, String lastName) {
+        try {
+            // Очищаем входные данные
+            String trimmedFirstName = firstName != null ? firstName.trim() : null;
+            String trimmedLastName = lastName != null ? lastName.trim() : null;
+
+            // Получаем поток сотрудников в зависимости от входных данных
+            Stream<Employee> employeeStream;
+
+            // Если оба поля пустые или null, возвращаем всех сотрудников
+            if ((trimmedFirstName == null || trimmedFirstName.isEmpty()) &&
+                    (trimmedLastName == null || trimmedLastName.isEmpty())) {
+                employeeStream = employeeRepository.findAll().stream();
+            } else if (trimmedFirstName != null && trimmedLastName != null) {
+                // Если оба поля указаны, ищем по обоим
+                employeeStream = employeeRepository.findByFirstNameAndLastName(trimmedFirstName, trimmedLastName).stream();
+            } else {
+                // Создаём потоки для поиска по firstName и lastName
+                Stream<Employee> firstNameStream = trimmedFirstName != null && !trimmedFirstName.isEmpty()
+                        ? employeeRepository.findByFirstName(trimmedFirstName).stream()
+                        : Stream.empty();
+
+                Stream<Employee> lastNameStream = trimmedLastName != null && !trimmedLastName.isEmpty()
+                        ? employeeRepository.findByLastName(trimmedLastName).stream()
+                        : Stream.empty();
+
+                // Объединяем результаты поиска, удаляем дубликаты
+                employeeStream = Stream.concat(firstNameStream, lastNameStream)
+                        .distinct();
+            }
+
+            // Преобразуем поток в список
+            List<Employee> employees = employeeStream.toList();
+
+            // Проверяем, что список не пустой, используя Optional
+            return Optional.of(employees)
+                    .filter(list -> !list.isEmpty())
+                    .map(employeeMapper::toEmployeeResponseList)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Сотрудники с указанными данными не найдены"));
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Произошла ошибка при поиске сотрудников: " + e.getMessage());
+        }
     }
 }

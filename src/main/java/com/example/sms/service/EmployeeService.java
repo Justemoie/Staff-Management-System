@@ -16,4 +16,16 @@ public interface EmployeeService {
     EmployeeResponse deleteAssignmentFromEmployee(Long employeeId, Long assignmentId);
 
     List<EmployeeResponse> bulkUpsertEmployees(List<EmployeeRequest> employeeRequests);
+
+    List<EmployeeResponse> getAll();
+
+    EmployeeResponse getById(Long id);
+
+    EmployeeResponse create(EmployeeRequest requestEntity);
+
+    EmployeeResponse update(Long id, EmployeeRequest requestEntity);
+
+    void delete(Long id);
+
+    List<EmployeeResponse> searchByInitials(String firstName, String lastName);
 }
